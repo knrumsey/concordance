@@ -3,7 +3,7 @@
     "path": "~/Desktop/Software_Kellin/concordance/README.rmd",
     "project_path": "README.rmd",
     "type": "r_markdown",
-    "hash": "3258083815",
+    "hash": "3127168112",
     "contents": "",
     "dirty": false,
     "created": 1677633604340.0,
@@ -11,15 +11,15 @@
     "relative_order": 7,
     "properties": {
         "tempName": "Untitled1",
-        "cursorPosition": "7,57",
-        "scrollLine": "3"
+        "cursorPosition": "38,1",
+        "scrollLine": "26"
     },
     "folds": "",
-    "lastKnownWriteTime": 1677635160,
+    "lastKnownWriteTime": 1677638896,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1677635160113,
+    "last_content_update": 1677638896041,
     "read_only": false,
     "read_only_alternatives": []
 }

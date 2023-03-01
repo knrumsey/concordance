@@ -22,12 +22,27 @@ and admits a large class of *measures* for the inputs.
 To install this package, use
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("knrumsey/concordance")
+# install.packages("remotes")
+remotes::install_github("knrumsey/concordance@main")
 ```
 
 A paper describing this method will be added once published. A vignette
 for this package is also available.
+
+## Copyright Notice
+
+© *2023. Triad National Security, LLC. All rights reserved.*
+
+*This program was produced under U.S. Government contract
+89233218CNA000001 for Los Alamos National Laboratory (LANL), which is
+operated by Triad National Security, LLC for the U.S. Department of
+Energy/National Nuclear Security Administration. All rights in the
+program are reserved by Triad National Security, LLC, and the U.S.
+Department of Energy/National Nuclear Security Administration. The
+Government is granted for itself and others acting on its behalf a
+nonexclusive, paid-up, irrevocable worldwide license in this material to
+reproduce, prepare derivative works, distribute copies to the public,
+perform publicly and display publicly, and to permit others to do so.*
 
 ## References
 
