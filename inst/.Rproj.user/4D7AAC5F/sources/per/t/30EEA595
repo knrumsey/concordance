@@ -1,0 +1,25 @@
+{
+    "id": "30EEA595",
+    "path": "~/Desktop/ActiveSubspace/concordance/inst/toy_example.R",
+    "project_path": "toy_example.R",
+    "type": "r_source",
+    "hash": "609593186",
+    "contents": "",
+    "dirty": false,
+    "created": 1674157424214.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "tempName": "Untitled1",
+        "cursorPosition": "116,0",
+        "scrollLine": "89"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1674167426,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1674167426231,
+    "read_only": false,
+    "read_only_alternatives": []
+}

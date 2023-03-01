@@ -1,0 +1,166 @@
+# Make explanatory figure (discussed with Scott 1/19/2023)
+library(ellipse)
+library(duqling)
+library(concordance)
+library(BASS)
+library(lhs)
+
+# Make simple problem
+ff <- function(x, centre=c(0.5, 0.5), w=5e-6, v=20){
+  res <- w*lim_polynomial(v*(x - centre)) + x[1]*x[2]
+  return(as.numeric(res))
+}
+xx <- seq(0,1,length.out=31)
+X <- expand.grid(xx,xx)
+Z <- matrix(NA, 31, 31)
+cnt <- 1
+for(i in 1:31){
+  for(j in 1:31){
+    Z[i,j] <- ff(X[cnt,], c(0.5, 0.5), w=0.000005, v=20)
+    cnt <- cnt + 1
+  }
+}
+contour(xx, xx, Z, nlevels=30)
+
+# Get computer models
+set.seed(42)
+pert <- matrix(runif(10, 0.95, 1.05), ncol=2)
+f_list <- list()
+f_list[[1]] <- function(x) ff(x, c(0.1, 0.8), w=5e-6*pert[1,1], v=20*pert[1,2])
+f_list[[2]] <- function(x) ff(x, c(0.5, 0.7), w=5e-6*pert[2,1], v=20*pert[2,2])
+f_list[[3]] <- function(x) ff(x, c(0.7, 0.5), w=5e-6*pert[3,1], v=20*pert[3,2])
+f_list[[4]] <- function(x) ff(x, c(0.2, 0.3), w=5e-6*pert[4,1], v=20*pert[4,2])
+f_list[[5]] <- function(x) ff(x, c(0.25, 0.75), w=5e-6*pert[5,1], v=20*pert[5,2])
+
+# Get priors
+p_list <- list()
+p_list[[1]] <- list(list(dist="normal", trunc=c(-Inf, Inf), mean=0.1, sd=1/30),
+                    list(dist="normal", trunc=c(-Inf, Inf), mean=0.8, sd=1/30))
+
+p_list[[2]] <- list(list(dist="normal", trunc=c(-Inf, Inf), mean=0.5, sd=1/15),
+                    list(dist="normal", trunc=c(-Inf, Inf), mean=0.7, sd=1/15))
+
+p_list[[3]] <- list(list(dist="normal", trunc=c(-Inf, Inf), mean=0.7, sd=1/12),
+                    list(dist="normal", trunc=c(-Inf, Inf), mean=0.5, sd=1/12))
+
+p_list[[4]] <- list(list(dist="normal", trunc=c(-Inf, Inf), mean=0.2, sd=1/20),
+                    list(dist="normal", trunc=c(-Inf, Inf), mean=0.3, sd=1/20))
+
+p_list[[5]] <- list(list(dist="normal", trunc=c(-Inf, Inf), mean=0.25, sd=1/18),
+                    list(dist="normal", trunc=c(-Inf, Inf), mean=0.75, sd=1/18))
+
+sd_vec <- c(1/30, 1/15, 1/12, 1/20, 1/18)
+mean_vec <- matrix(c(.1, .8, .5, .7, .7, .5, .2, .3, .25, .75), ncol=2, byrow=TRUE)
+
+# For each design, find active subspace
+X1 <- maximinLHS(1000, 2)
+#X1[,1] <- qnorm(X1[,1], 0.1, 1/30)
+#X1[,2] <- qnorm(X1[,2], 0.8, 1/30)
+y1 <- apply(X1, 1, f_list[[1]])
+mod1 <- bass(X1, y1)
+C1 <- C_bass(mod1, prior=p_list[[1]])
+V1 <- t(eigen(C1)$values*t(eigen(C1)$vectors))
+V1 <- V1/sqrt(sum(V1[,1])^2)/30*2
+
+X2 <- maximinLHS(1000, 2)
+#X2[,1] <- qnorm(X2[,1], 0.5, 1/15)
+#X2[,2] <- qnorm(X2[,2], 0.7, 1/15)
+y2 <- apply(X2, 1, f_list[[2]])
+mod2 <- bass(X2, y2)
+C2 <- C_bass(mod2, prior=p_list[[2]])
+V2 <- t(eigen(C2)$values*t(eigen(C2)$vectors))
+V2 <- V2/sqrt(sum(V2[,1])^2)/15*2
+
+X3 <- maximinLHS(1000, 2)
+#X3[,1] <- qnorm(X3[,1], 0.7, 1/12)
+#X3[,2] <- qnorm(X3[,2], 0.5, 1/12)
+y3 <- apply(X3, 1, f_list[[3]])
+mod3 <- bass(X3, y3)
+C3 <- C_bass(mod3, prior=p_list[[3]])
+V3 <- t(eigen(C3)$values*t(eigen(C3)$vectors))
+V3 <- V3/sqrt(sum(V3[,1])^2)/12*2
+
+X4 <- maximinLHS(1000, 2)
+#X4[,1] <- qnorm(X4[,1], 0.2, 1/20)
+#X4[,2] <- qnorm(X4[,2], 0.3, 1/20)
+y4 <- apply(X4, 1, f_list[[4]])
+mod4 <- bass(X4, y4)
+C4 <- C_bass(mod4, prior=p_list[[4]])
+V4 <- t(eigen(C4)$values*t(eigen(C4)$vectors))
+V4 <- V4/sqrt(sum(V4[,1])^2)/20*2
+
+
+
+# Now do concordance analysis with "new design"
+X <- randomLHS(2000, 2)
+y5 <- apply(X, 1, f_list[[5]])
+mod5 <- bass(X, y5)
+for(i in 1:5){
+  tmp1 <- C5 <- C_bass(mod5, prior=p_list[[i]])
+  assign(paste0("C5_",i), tmp1)
+
+  tmp2 <- Cfg_bass(mod5, get(paste0("mod", i)), prior=p_list[[i]])
+  assign(paste0("Cfg5_", i), tmp2)
+
+  V <- t(eigen(tmp1)$values*t(eigen(tmp1)$vectors))
+  V <- V/sqrt(sum(V[,1])^2)*sd_vec[i]*2
+  assign(paste0("V5_", i), V)
+
+  t0 <- sum(diag(tmp1))
+  t01 <- sum(diag(tmp2))
+  t1 <- sum(diag(get(paste0("C",i))))
+  assign(paste0("conc",i,"5"), t01/sqrt(t0*t1))
+  cat(get(paste0("conc",i,5)),"\n")
+}
+
+
+# Panel One
+png("../../Examples/PanelA.png", height=5.5, width=5.35, units="in", res=300)
+plot(NULL, xlim=c(0,1), ylim=c(0,1),
+     xlab="", ylab="", main="Trusted Designs",
+     xaxt="n", yaxt="n")
+text(1 - 0.4, 1, "Global Parameter Space", pos=1, font=3)
+polygon(ellipse(0, scale=c(1,1)/30, centre=c(0.1, 0.8)), lty=3, lwd=3)
+polygon(ellipse(0, scale=c(1,1)/15, centre=c(0.5, 0.7)), lty=3, lwd=3)
+polygon(ellipse(.4, scale=c(1,1)/12, centre=c(0.7, 0.5)), lty=3, lwd=3)
+polygon(ellipse(-.1, scale=c(1,1)/20, centre=c(0.2, 0.3)), lty=3, lwd=3)
+polygon(ellipse(0, scale=c(1,1)/18, centre=c(0.25, 0.75)), lty=3, lwd=1, border="dodgerblue")
+for(i in 1:4){
+  VV <- get(paste0("V", i))
+  arrows(mean_vec[i,1], mean_vec[i,2], (mean_vec[i,1] + VV[1,1]), (mean_vec[i,2] + VV[2,1]), length=0.05)
+  arrows(mean_vec[i,1], mean_vec[i,2], (mean_vec[i,1] + 20*VV[1,2]), (mean_vec[i,2] + 20*VV[2,2]), length=0.05)
+}
+
+legend("bottomright", c("Parameter space (design specific)", "Active Subspace"),
+       lty=c(3, 1))
+dev.off()
+
+# Make panel two
+xx <- seq(0,1,length.out=31)
+X <- expand.grid(xx,xx)
+Z <- matrix(NA, 31, 31)
+cnt <- 1
+for(i in 1:31){
+  for(j in 1:31){
+    Z[i,j] <- f_list[[5]](X[cnt,])
+    cnt <- cnt + 1
+  }
+}
+contour(xx, xx, Z, nlevels=30, col='gray',
+        xlab="", ylab="", main="New Design",
+        xaxt="n", yaxt="n")
+text(1 - 0.4, 1, "Global Parameter Space", pos=1, font=3)
+polygon(ellipse(0,   scale=c(1,1)/30,   centre=c(0.1, 0.8)), lty=3, lwd=3, border=c('dodgerblue', 'orange')[(conc15 < 0.1) + 1])
+polygon(ellipse(0,   scale=c(1,1)/15,   centre=c(0.5, 0.7)), lty=3, lwd=3, border=c('dodgerblue', 'orange')[(conc25 < 0.1) + 1])
+polygon(ellipse(.4,  scale=c(1,1)/12,  centre=c(0.7, 0.5)),  lty=3, lwd=3, border=c('dodgerblue', 'orange')[(conc35 < 0.1) + 1])
+polygon(ellipse(-.1, scale=c(1,1)/20, centre=c(0.2, 0.3)),   lty=3, lwd=3, border=c('dodgerblue', 'orange')[(conc45 < 0.1) + 1])
+
+for(i in 1:4){
+  VV <- get(paste0("V5_", i))
+  arrows(mean_vec[i,1], mean_vec[i,2], (mean_vec[i,1] + VV[1,1]), (mean_vec[i,2] + VV[2,1]), length=0.05)
+  arrows(mean_vec[i,1], mean_vec[i,2], (mean_vec[i,1] + 20*VV[1,2]), (mean_vec[i,2] + 20*VV[2,2]), length=0.05)
+}
+
+
+
+

@@ -1,0 +1,69 @@
+---
+title: "Concordance and Active Subspaces for High-Dimensional Computer Models"
+author: "Kellin Rumsey"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Concordance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+library(concordance)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+### Active Subspace Discovery
+
+Consider the computer model $f(x):$
+```{R}
+f <- function(x)
+  x[1]^2 + x[1]*x[2] + x[2]^3/9
+```
+
+Assuming that the inputs $x = (x_1, x_2, x_3) \in [0,1]^3$ have a uniform prior over the unit cube, the $C$ matrix for this model is given by
+$$C = E\left(\nabla f \nabla f^T\right) = \frac{1}{45}\begin{bmatrix}
+120 & 50 & 0 \\
+50 & 21 & 0 \\
+0 & 0 & 0
+\end{bmatrix}.$$
+
+We are given a set of $n=500$ *model runs*.
+```{R}
+n <- 500
+x <- matrix(runif(3*n), nrow=n)
+y <- apply(x, 1, f)
+```
+The first step is to fit an emulator to the data using the `BASS` package.
+```{R}
+library(BASS)
+mod <- bass(x, y)
+```
+Next we estimate $C$ with the `concordance` package.
+```{R}
+C <- C_bass(mod)
+round(C*45, 3)
+```
+The eigenvalue decomposition of $C$ gives the active directions of $f$. 
+```{R}
+eigen(C)
+```
+Activity scores can be computed as follows.
+```{R}
+act_scores(C)
+act_scores(C, k=3)
+```
+
+### Concordance Analysis
+
+Will add a concordance example at a later date. 
+
+
+
+
+
+

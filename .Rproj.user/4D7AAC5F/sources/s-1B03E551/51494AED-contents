@@ -1,0 +1,40 @@
+---
+title: "concordance"
+output: github_document
+bibliography: README-bib.bib
+---
+
+[![License: GPL v3](https://img.shields.io/badge/License-BSD_3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+`r badger::badge_devel("knrumsey/concordance", "purple")`
+
+
+ 
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+library(BASS)
+```
+
+
+`concordance` is an R package for performing concordance analyses and for the discovery of active subspaces (@constantine2015active) in high-dimensions. The "workhorse" of the package is the `C_bass()` function, which estimates *Constantine's* $C$ matrix for a given computer model and behaves similarly to the `activegp::C_gp()` function (described in @wycoff2021sequential). The `C_bass()` function, which relies on a Bayesian MARS emulator (as described in @francom2020bass and implemented in the [BASS package](https://CRAN.R-project.org/package=BASS)) is likely to be more efficient and accurate when the dimension of the input space is large and admits a large class of *measures* for the inputs. 
+
+To install this package, use
+
+```{R, eval=F}
+# install.packages("devtools")
+devtools::install_github("knrumsey/concordance")
+```
+
+A paper describing this method will be added once published. A vignette for this package is also available. 
+
+
+## References
+
+
+
