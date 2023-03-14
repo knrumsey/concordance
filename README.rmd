@@ -31,7 +31,7 @@ To install this package, use
 remotes::install_github("knrumsey/concordance@main")
 ```
 
-A paper describing this method will be added once published. A vignette for this package is also available. 
+A reference to a paper describing this method will be added once published. A vignette for this package is also available and can be viewed by typing `browseVignettes("concordance")` in R (after installation). 
 
 ## Copyright Notice
 &copy; *2023. Triad National Security, LLC. All rights reserved.*

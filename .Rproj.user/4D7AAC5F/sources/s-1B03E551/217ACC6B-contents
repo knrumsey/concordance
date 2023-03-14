@@ -1,3 +1,0 @@
-build_prior <- function(dist="uniform", trunc=c(0, 1)){
-  print("hey")
-}
