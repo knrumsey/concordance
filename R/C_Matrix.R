@@ -152,9 +152,14 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
     if(compute_flag){
       mod_number <- mod_number_new
       M          <- M_new
-      knots      <- mod$knotInd.des[mod_number, 1:M, ]
       signs      <- mod$signs.des[mod_number, 1:M, ]
       indic      <- mod$vars.des[mod_number, 1:M, ]
+      knots      <- mod$knotInd.des[mod_number, 1:M, ]
+      #if(gbass_flag){
+      #  knots    <- mod$knots.des[mod_number, 1:M, ]
+      #}else{
+      #  knots    <- mod$knotInd.des[mod_number, 1:M, ]
+      #}
       # Initalize arrays
       C <- A <- B <- I1 <- I2 <- I3 <- array(NA, dim=c(mod$pdes, M, M))
 
@@ -171,10 +176,10 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
 
         # If this comes from BASS (rather than GBASS with gm2bm)
         # then we need to account for Devin's g-scaling-factors
-        if(!gbass_flag){
-          d <- 1/((s + 1)/2 - s*t)
-          s <- s*d
-        }
+        #if(!gbass_flag){
+        d <- 1/((s + 1)/2 - s*t)
+        s <- s*d
+        #}
 
         #Handle NA cases
         s[is.na(s)] <- 1
