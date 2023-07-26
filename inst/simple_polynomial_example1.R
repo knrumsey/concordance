@@ -125,23 +125,4 @@ save(metrics1, metrics2, file=paste0("metrics_N", N, "_", cntr, ".rda"))
 cntr <- cntr + 1
 
 
-# TEST IDEA ABOUT IDENTITY
-N <- 300
-pp <- 3
-X <- maximinLHS(N-2, pp)
-X <- rbind(X, rep(0, pp))
-X <- rbind(X, rep(1, pp))
-Yf <- apply(X, 1, f)
 
-mod <- bass(X, Yf)
-C1 <- C_bass(mod)
-
-Ctrue[1:2, 1:2]
-C1[1:2, 1:2]
-
-E <- eigen(C1)$vectors
-Z <- X%*%E
-modZ <- bass(Z, Yf)
-CZ <- C_bass(modZ, scaled=TRUE)
-eigen(CZ)
-EZ <- eigen(CZ)$vectors

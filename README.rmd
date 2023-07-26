@@ -8,7 +8,6 @@ bibliography: README-bib.bib
 `r badger::badge_devel("knrumsey/concordance", "purple")`
 
 
- 
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -21,8 +20,14 @@ knitr::opts_chunk$set(
 library(BASS)
 ```
 
+```{r, eval=TRUE, echo=FALSE, fig.cap="This logo was designed by Imagine AI Art Studio", out.width='40%'}
+knitr::include_graphics("inst/logos/CONCORDANCE.png")
+```
 
-`concordance` is an R package for performing concordance analyses and for the discovery of active subspaces (@constantine2015active) in high-dimensions. The "workhorse" of the package is the `C_bass()` function, which estimates *Constantine's* $C$ matrix for a given computer model and behaves similarly to the `activegp::C_gp()` function (described in @wycoff2021sequential). The `C_bass()` function, which relies on a Bayesian MARS emulator (as described in @francom2020bass and implemented in the [BASS package](https://CRAN.R-project.org/package=BASS)) is likely to be more efficient and accurate when the dimension of the input space is large and admits a large class of *measures* for the inputs. 
+
+### Description 
+
+`concordance` is an R package for performing concordance analyses and for the [discovery of active subspaces in high-dimensions](https://arxiv.org/pdf/2307.11241.pdf). The "workhorse" of the package is the `C_bass()` function, which estimates *Constantine's* $C$ matrix for a given computer model and behaves similarly to the `activegp::C_gp()` function (described in @wycoff2021sequential). The `C_bass()` function, which relies on a Bayesian MARS emulator (as described in @francom2020bass and implemented in the [BASS package](https://CRAN.R-project.org/package=BASS)) is likely to be more efficient and accurate when the dimension of the input space is large and admits a large class of *measures* for the inputs. 
 
 To install this package, use
 
@@ -31,7 +36,8 @@ To install this package, use
 remotes::install_github("knrumsey/concordance@main")
 ```
 
-A reference to a paper describing this method will be added once published. A vignette for this package is also available and can be viewed by typing `browseVignettes("concordance")` in R (after installation). 
+
+This R package is based on the method described [here](https://arxiv.org/pdf/2307.11241.pdf). A vignette for this package is also available and can be viewed by typing `browseVignettes("concordance")` in R (after installation). 
 
 ## Copyright Notice
 &copy; *2023. Triad National Security, LLC. All rights reserved.*
