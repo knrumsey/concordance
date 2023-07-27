@@ -82,7 +82,7 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
     if(is.null(prior[[i]]$trunc)){
       prior[[i]]$trunc <- mod$range.des[,i]
     }
-    prior[[i]]$trunc <- BASS:::scale.range(prior[[i]]$trunc, mod$range.des[,i])
+    prior[[i]]$trunc <- scale_range(prior[[i]]$trunc, mod$range.des[,i])
 
     # 2. Handle ach distribution type separately
     distribution = prior[[i]]$dist
@@ -91,7 +91,7 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
         num_mix <- length(prior[[i]]$mean)
         prior[[i]]$weights <- rep(1/num_mix, num_mix)
       }
-      prior[[i]]$mean <- BASS:::scale.range(prior[[i]]$mean, mod$range.des[,i])
+      prior[[i]]$mean <- scale_range(prior[[i]]$mean, mod$range.des[,i])
       prior[[i]]$sd <- prior[[i]]$sd/(mod$range.des[2,i] - mod$range.des[1,i])
       prior[[i]]$z <- pnorm((prior[[i]]$trunc[2]-prior[[i]]$mean)/prior[[i]]$sd) - pnorm((prior[[i]]$trunc[1]-prior[[i]]$mean)/prior[[i]]$sd)
       cc <- sum(prior[[i]]$weights*prior[[i]]$z)
@@ -330,6 +330,14 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
     return(Cf_post[[1]])
   }
   return(Cf_post)
+}
+
+scale_range <- function(x, r=NULL){
+  if (is.null(r))
+    r <- range(x)
+  if ((r[2] - r[1]) == 0)
+    return(x - r[1])
+  return((x - r[1])/(r[2] - r[1]))
 }
 
 

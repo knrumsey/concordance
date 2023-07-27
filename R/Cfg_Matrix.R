@@ -99,7 +99,7 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
     if(is.null(prior[[i]]$trunc)){
       prior[[i]]$trunc <- mod$range.des[,i]
     }
-    prior[[i]]$trunc <- BASS:::scale.range(prior[[i]]$trunc, mod$range.des[,i])
+    prior[[i]]$trunc <- scale_range(prior[[i]]$trunc, mod$range.des[,i])
 
     # 2. Handle ach distribution type separately
     distribution = prior[[i]]$dist
@@ -108,7 +108,7 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
         num_mix <- length(prior[[i]]$mean)
         prior[[i]]$weights <- rep(1/num_mix, num_mix)
       }
-      prior[[i]]$mean <- BASS:::scale.range(prior[[i]]$mean, mod$range.des[,i])
+      prior[[i]]$mean <- scale_range(prior[[i]]$mean, mod$range.des[,i])
       prior[[i]]$sd <- prior[[i]]$sd/(mod$range.des[2,i] - mod$range.des[1,i])
       prior[[i]]$z <- pnorm((prior[[i]]$trunc[2]-prior[[i]]$mean)/prior[[i]]$sd) - pnorm((prior[[i]]$trunc[1]-prior[[i]]$mean)/prior[[i]]$sd)
       cc <- sum(prior[[i]]$weights*prior[[i]]$z)
