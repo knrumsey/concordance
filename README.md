@@ -9,7 +9,7 @@ v3](https://img.shields.io/badge/License-BSD_3-blue.svg)](https://www.gnu.org/li
 
 <div class="figure">
 
-<img src="inst/logos/CONCORDANCE.png" alt="This logo was designed by Imagine AI Art Studio" width="40%" />
+<img src="inst/logos/CONCORDANCE.png" alt="This logo was designed by Imagine AI Art Studio" width="50%" />
 <p class="caption">
 This logo was designed by Imagine AI Art Studio
 </p>
@@ -20,16 +20,16 @@ This logo was designed by Imagine AI Art Studio
 
 `concordance` is an R package for performing concordance analyses and
 for the [discovery of active subspaces in
-high-dimensions](https://arxiv.org/pdf/2307.11241.pdf). The “workhorse”
-of the package is the `C_bass()` function, which estimates
-*Constantine’s* $C$ matrix for a given computer model and behaves
-similarly to the `activegp::C_gp()` function (described in Wycoff,
-Binois, and Wild (2021)). The `C_bass()` function, which relies on a
-Bayesian MARS emulator (as described in Francom and Sansó (2020) and
-implemented in the [BASS
-package](https://CRAN.R-project.org/package=BASS)) is likely to be more
-efficient and accurate when the dimension of the input space is large
-and admits a large class of *measures* for the inputs.
+high-dimensions](https://arxiv.org/pdf/2307.11241.pdf) (described in
+Rumsey, Francom, and Wiel (2023)). The “workhorse” of the package is the
+`C_bass()` function, which estimates *Constantine’s* $C$ matrix (see
+(**constantine2015?**))for a given computer model and behaves similarly
+to the `activegp::C_gp()` function (described in Wycoff, Binois, and
+Wild (2021)). The `C_bass()` function, which relies on a Bayesian MARS
+emulator (as described in Francom and Sansó (2020) and implemented in
+the [BASS package](https://CRAN.R-project.org/package=BASS)) is likely
+to be more efficient and accurate when the dimension of the input space
+is large and admits a large class of *measures* for the inputs.
 
 To install this package, use
 
@@ -67,6 +67,14 @@ perform publicly and display publicly, and to permit others to do so.*
 Francom, Devin, and Bruno Sansó. 2020. “Bass: An r Package for Fitting
 and Performing Sensitivity Analysis of Bayesian Adaptive Spline
 Surfaces.” *Journal of Statistical Software* 94 (LA-UR-20-23587).
+
+</div>
+
+<div id="ref-rumsey2023discovering" class="csl-entry">
+
+Rumsey, Kellin N, Devin Francom, and Scott Vander Wiel. 2023.
+“Discovering Active Subspaces for High-Dimensional Computer Models.”
+*arXiv Preprint arXiv:2307.11241*.
 
 </div>
 
