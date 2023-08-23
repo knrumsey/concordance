@@ -83,7 +83,7 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   if(ncol(mcmc.use) == 1){
     mcmc.use <- cbind(mcmc.use, mcmc.use)
   }
-  if(ncol(mcmc.use > 2)){
+  if(ncol(mcmc.use) > 2){
     warning("ncol(mcmc.use) should not exceed 2")
   }
   if(mod$p != mod2$p){
