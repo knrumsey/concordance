@@ -60,7 +60,7 @@ Cfg_mc <- function(f, g, measure, grad=FALSE, nmc=1e4, names = NULL, seed=NULL, 
 #' @param mod1 a fitted BASS model for first function
 #' @param mod2 a fitted BASS model for second function
 #' @param prior NULL (default) `[0, 1]` prior for each variable. See details for required structure of prior
-#' @param mcmc.use set of indices telling which mcmc draws to use.
+#' @param mcmc.use vector of mcmc indices to be used for both models. Otherwise, a matrix
 #' @return A list representing the posterior distribution of the Co-Constantine matrix (Cfg).
 #' @details prior should be a list of length p (one object for each variable). Each element of prior should be a named list with fields
 #'
@@ -78,6 +78,13 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   mod <- mod1
   if(is.null(mcmc.use)){
     mcmc.use <- min(length(mod$s2), length(mod2$s2))
+  }
+  mcmc.use <- as.matrix(mcmc.use)
+  if(ncol(mcmc.use) == 1){
+    mcmc.use <- cbind(mcmc.use, mcmc.use)
+  }
+  if(ncol(mcmc.use > 2)){
+    warning("ncol(mcmc.use) should not exceed 2")
   }
   if(mod$p != mod2$p){
     stop("Detected different number of variables in mod1 and mod2")
@@ -148,15 +155,16 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   Xt <- mod$xx.des
   for(r in 1:length(mcmc.use)){
     #Compute only the stuff we will need for every iteration
-    rr <- mcmc.use[r]
+    rr1 <- mcmc.use[r,1]
+    rr2 <- mcmc.use[r,2]
 
-    mod_number_new <- mod$model.lookup[rr]
-    coeff          <- mod$beta[rr,]
+    mod_number_new <- mod$model.lookup[rr1]
+    coeff          <- mod$beta[rr1,]
     coeff          <- matrix(coeff[!is.na(coeff)][-1], nrow=1)
     M_new          <- length(coeff)
 
-    mod_number_new2 <- mod2$model.lookup[rr]
-    coeff2          <- mod2$beta[rr,]
+    mod_number_new2 <- mod2$model.lookup[rr2]
+    coeff2          <- mod2$beta[rr2,]
     coeff2          <- matrix(coeff2[!is.na(coeff2)][-1], nrow=1)
     M_new2          <- length(coeff2)
 

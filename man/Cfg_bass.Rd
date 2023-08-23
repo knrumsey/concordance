@@ -13,7 +13,7 @@ Cfg_bass(mod1, mod2, prior = NULL, mcmc.use = NULL)
 
 \item{prior}{NULL (default) \verb{[0, 1]} prior for each variable. See details for required structure of prior}
 
-\item{mcmc.use}{set of indices telling which mcmc draws to use.}
+\item{mcmc.use}{vector of mcmc indices to be used for both models. Otherwise, a matrix}
 }
 \value{
 A list representing the posterior distribution of the Co-Constantine matrix (Cfg).
