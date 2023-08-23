@@ -155,6 +155,11 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
       signs      <- mod$signs.des[mod_number, 1:M, ]
       indic      <- mod$vars.des[mod_number, 1:M, ]
       knots      <- mod$knotInd.des[mod_number, 1:M, ]
+      if(M==1){
+        signs <- matrix(signs, nrow=1, ncol=length(signs))
+        indic <- matrix(indic, nrow=1, ncol=length(indic))
+        knots <- matrix(knots, nrow=1, ncol=length(knots))
+      }
       #if(gbass_flag){
       #  knots    <- mod$knots.des[mod_number, 1:M, ]
       #}else{
