@@ -183,12 +183,22 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
       knots      <- mod$knotInd.des[mod_number, 1:M, ]
       signs      <- mod$signs.des[mod_number, 1:M, ]
       indic      <- mod$vars.des[mod_number, 1:M, ]
+      if(M==1){
+        signs <- matrix(signs, nrow=1, ncol=length(signs))
+        indic <- matrix(indic, nrow=1, ncol=length(indic))
+        knots <- matrix(knots, nrow=1, ncol=length(knots))
+      }
 
       mod_number2 <- mod_number_new2
       M2          <- M_new2
       knots2      <- mod2$knotInd.des[mod_number2, 1:M2, ]
       signs2      <- mod2$signs.des[mod_number2, 1:M2, ]
       indic2      <- mod2$vars.des[mod_number2, 1:M2, ]
+      if(M2==1){
+        signs2 <- matrix(signs2, nrow=1, ncol=length(signs2))
+        indic2 <- matrix(indic2, nrow=1, ncol=length(indic2))
+        knots2 <- matrix(knots2, nrow=1, ncol=length(knots2))
+      }
 
       # Initalize arrays
       C <- A <- B <- I1 <- I2 <- I3 <- array(NA, dim=c(mod$p, M, M2))
