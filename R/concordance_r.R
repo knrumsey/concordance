@@ -18,6 +18,85 @@ fd_grad <- function(f, x, h=1e-12, ...){
   return(gradient)
 }
 
+
+#' Concordance Analysis (with BASS)
+#'
+#' Computes the concordance between mod1 and mod2 (BASS models representing f1 and f2)
+#'
+#' @param mod1 BASS model representing function 1
+#' @param mod2 BASS model representing function 2
+#' @param prior NULL (default) Uniform(0,1) prior for each variable. See details fr required prior structure.
+#' @param mcmc.use a vector of mcmc replications to use. Can also be a 2-column matrix with indices for f1 and f2.
+#' @param q order for the activity score measures
+#' @param ... additional arguments passed fd_grad()
+#' @return Estimates of C1, C2, C12, V12, conc(f1, f2), contributions and coactivity scores
+#' @details `measure` should be an argument-free function which simulates a draw x ~ p(x) where p is the prior measure. If `measure` is numeric, then Monte Carlo draws are simulated from the standard uniform distribution as `runif(measure[1])`.
+#' @export
+coactive_bass <- function(mod1, mod2, prior=NULL, mcmc.use=NULL, q=1, ...){
+  if(is.null(mcmc.use)) mcmc.use <- min(length(mod1$s2), length(mod2$s2))
+  mcmc.use <- as.matrix(mcmc.use)
+  if(ncol(mcmc.use)==1) mcmc.use <- cbind(mcmc.use, mcmc.use)
+  obj <- list()
+  obj$C1 <- C_bass(mod1, prior, mcmc.use[,1])
+  obj$C2 <- C_bass(mod2, prior, mcmc.use[,2])
+  obj$C12 <- Cfg_bass(mod1, mod2, prior, mcmc.use)
+
+  V12 <- t1 <- t2 <- t12 <- conc <- activity1 <- activity2 <- coactivity_signed <- coactivity_unsigned <- contrib <- list()
+  nn <- nrow(mcmc.use)
+  for(i in 1:nn){
+    if(nn == 1){
+      C1i <- obj$C1
+      C2i <- obj$C2
+      C12i <- obj$C12
+    }else{
+      C1i <- obj$C1[[i]]
+      C2i <- obj$C2[[i]]
+      C12i <- obj$C12[[i]]
+    }
+
+    V12[[i]] <- (C12i + t(C12i))/2
+    t1[[i]] <- sum(diag(C1i))
+    t2[[i]] <- sum(diag(C2i))
+    t12[[i]] <- sum(diag(C12i))
+    conc[[i]] <- t12[[i]]/sqrt(t1[[i]]*t2[[i]])
+    activity1[[i]] <- act_scores(C1i, q)
+    activity2[[i]] <- act_scores(C2i, q)
+    coactivity_signed[[i]] <- coact_scores(V12[[i]], q=q, signed=TRUE)
+    coactivity_unsigned[[i]] <- coact_scores(V12[[i]], q=q, signed=FALSE)
+    contrib[[i]] <- eigen(V12[[i]])$values/sqrt(t1[[i]]*t2[[i]])
+  }
+  if(nn == 1){
+    V12 <- V12[[1]]
+    t1 <- t1[[1]]
+    t2 <- t2[[1]]
+    t12 <- t12[[1]]
+    conc <- conc[[1]]
+    contrib <- contrib[[1]]
+    activity1 <- activity1[[1]]
+    activity2 <- activity2[[1]]
+    coactivity_signed <- coactivity_signed[[1]]
+    coactivity_unsigned <- coactivity_unsigned[[1]]
+  }
+  obj$V12 <- V12
+  obj$t1 <- t1
+  obj$t2 <- t2
+  obj$t12 <- t12
+  obj$conc <- conc
+  obj$contrib <- contrib
+  obj$activity1 <- activity1
+  obj$activity2 <- activity2
+  obj$coactivity_signed <- coactivity_signed
+  obj$coactivity_unsigned <- coactivity_unsigned
+
+  class(obj) <- "CoactiveSubspace"
+  return(obj)
+}
+
+CoactiveSubspace.print <- function(x, ...){
+  cat("conc(f1, f2) = ", mean(unlist(x$conc)))
+}
+
+
 #' Concordance
 #'
 #' Computes the concordance between f and g
@@ -31,7 +110,7 @@ fd_grad <- function(f, x, h=1e-12, ...){
 #' @return the concordance between functions f and g
 #' @details `measure` should be an argument-free function which simulates a draw x ~ p(x) where p is the prior measure. If `measure` is numeric, then Monte Carlo draws are simulated from the standard uniform distribution as `runif(measure[1])`.
 #' @export
-conc <- function(f, g, measure, grad=FALSE, nmc=1e4, ...){
+conc_mc <- function(f, g, measure, grad=FALSE, nmc=1e4, ...){
   if(is.numeric(measure)){
     nn <- measure[1]
     measure <- function() runif(nn)
@@ -71,7 +150,7 @@ conc <- function(f, g, measure, grad=FALSE, nmc=1e4, ...){
 #' @return a list with components: C (constantine matrices), principle_grads, contributions, totals, conc, dist
 #' @details `measure` should be an argument-free function which simulates a draw x ~ p(x) where p is the prior measure. If `measure` is numeric, then Monte Carlo draws are simulated from the standard uniform distribution as `runif(measure[1])`.
 #' @export
-conc_analysis <- function(f, g, measure, grad=FALSE, nmc=1e4, names=c("f", "g"), seed=NULL, ...){
+conc_analysis_mc <- function(f, g, measure, grad=FALSE, nmc=1e4, names=c("f", "g"), seed=NULL, ...){
   if(!is.null(seed)){
     set.seed(seed)
   }

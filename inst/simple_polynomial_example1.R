@@ -112,10 +112,6 @@ lines(p_vec[ind], metrics2[ind,k], lwd=2, lty=1, col=bob[2])
 points(p_vec[ind], metrics2[ind,k], pch=15, col=bob[2])
 
 
-
-
-
-
 colnames(metrics1) <- c("model time", "full time", "L1", "L2", "Linf", "Lfrob")
 rownames(metrics1) <- p_vec
 colnames(metrics2) <- c("model time", "full time", "L1", "L2", "Linf", "Lfrob")

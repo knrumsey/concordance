@@ -29,6 +29,43 @@ act_scores <- function(C, k=1, plt=FALSE, norm=FALSE){
   return(res)
 }
 
+#' Co-Activity Scores
+#'
+#' This function computes the activity scores for main effects of the variables
+#'
+#' @param V The symmetrized co-Constantine matrix from Cfg_bass()
+#' @param q The number of columns of W to consider
+#' @param signed Use signed or unsigned version?
+#' @param plt Logical, should a plot be made?
+#' @param norm Logical, should activity scores be normalized to have a maximum value of 1?
+#' @return the coactivityactivity scores
+#' @export
+coact_scores <- function(V, q=1, signed=TRUE, plt=FALSE, norm=FALSE){
+  eig <- eigen(V)
+  W <- eig$vectors
+  lam <- eig$values
+  ord <- rev(order(abs(lam)))
+  if(signed == FALSE){
+    lam <- abs(lam)
+  }
+  if(q == 1){
+    res <- W[,ord[q]]^2*lam[ord[q]]
+  }else{
+    ind <- ord[1:q]
+    res <- apply(W[,ind], 1, function(w, lam) sum(w^2*lam), lam=lam[1:q])
+  }
+
+  if(norm){
+    res <- res/max(abs(res))
+  }
+
+  if(plt){
+    plot(res, xlab="Inputs", ylab=paste0("Activity Score (", k, ")"), pch=16, cex=2, ylim=range(res))
+  }
+
+  return(res)
+}
+
 
 #' Active Dimension (Not validated. Might be buggy)
 #'
@@ -41,7 +78,7 @@ act_scores <- function(C, k=1, plt=FALSE, norm=FALSE){
 #' @param alpha significance threshold for testing procedure
 #' @param all_sets should all dimension sets be returned? Or just the smallest set.
 #' @param verbose should progress be printed
-#' @return the activity scores
+#' @return a list of active subspace dimensions
 #' @export
 act_dims <- function(C, X, y, k=ncol(C), alpha = 0.05, all_sets=TRUE, verbose=TRUE){
   EX <- eigen(C)$vectors

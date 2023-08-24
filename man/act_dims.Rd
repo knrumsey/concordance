@@ -22,7 +22,7 @@ act_dims(C, X, y, k = ncol(C), alpha = 0.05, all_sets = TRUE, verbose = TRUE)
 \item{verbose}{should progress be printed}
 }
 \value{
-the activity scores
+a list of active subspace dimensions
 }
 \description{
 This function estimates the dimensions of the active subspace using a sequential testing approach

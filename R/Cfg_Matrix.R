@@ -153,7 +153,7 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
 
   Cfg_post <- list()
   Xt <- mod$xx.des
-  for(r in 1:length(mcmc.use)){
+  for(r in 1:nrow(mcmc.use)){
     #Compute only the stuff we will need for every iteration
     rr1 <- mcmc.use[r,1]
     rr2 <- mcmc.use[r,2]
