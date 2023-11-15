@@ -4,7 +4,7 @@
 \alias{C_bass}
 \title{Estimate the Constantine Matrix with BASS}
 \usage{
-C_bass(mod, prior = NULL, mcmc.use = NULL, scaled = FALSE)
+C_bass(mod, prior = NULL, mcmc.use = NULL, scale01 = FALSE)
 }
 \arguments{
 \item{mod}{a fitted BASS model}
@@ -13,7 +13,7 @@ C_bass(mod, prior = NULL, mcmc.use = NULL, scaled = FALSE)
 
 \item{mcmc.use}{set of indices telling which mcmc draws to use}
 
-\item{scaled}{logical (default FALSE). When TRUE, the the C matix corresponds to the (0, 1)-scaled inputs rather than the original inputs.}
+\item{scale01}{logical (default FALSE). When TRUE, the the C matix corresponds to the (0, 1)-scaled inputs rather than the original inputs.}
 }
 \value{
 A list representing the posterior distribution of the Constantine matrix.

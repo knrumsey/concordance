@@ -48,7 +48,7 @@ C_mc <- function(f, measure, grad=FALSE, nmc=1e4, seed=NULL, ...){
 #' @param mod a fitted BASS model
 #' @param prior NULL (default) (0,1])prior for each variable. See details for required structure of prior
 #' @param mcmc.use set of indices telling which mcmc draws to use
-#' @param scaled logical (default FALSE). When TRUE, the the C matix corresponds to the (0, 1)-scaled inputs rather than the original inputs.
+#' @param scale01 logical (default FALSE). When TRUE, the the C matix corresponds to the (0, 1)-scaled inputs rather than the original inputs.
 #' @return A list representing the posterior distribution of the Constantine matrix.
 #' @details prior should be a list of length p (one object for each variable). Each element of prior should be a named list with fields.
 #' See also the concordance::build_prior() function.
@@ -61,7 +61,7 @@ C_mc <- function(f, measure, grad=FALSE, nmc=1e4, seed=NULL, ...){
 #'    - shape, scale - parameters for gamma distribution
 #'    - weights - vector of mixture weights (currently only compatible with dist="normal")
 #' @export
-C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
+C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
   if(is.null(mcmc.use)){
     mcmc.use <- length(mod$nbasis)
   }
@@ -84,7 +84,7 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
     }
     prior[[i]]$trunc <- scale_range(prior[[i]]$trunc, mod$range.des[,i])
 
-    # 2. Handle ach distribution type separately
+    # 2. Handle each distribution type separately
     distribution = prior[[i]]$dist
     if(distribution == "normal"){
       if(is.null(prior[[i]]$weights)){
@@ -95,10 +95,14 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
       prior[[i]]$sd <- prior[[i]]$sd/(mod$range.des[2,i] - mod$range.des[1,i])
       prior[[i]]$z <- pnorm((prior[[i]]$trunc[2]-prior[[i]]$mean)/prior[[i]]$sd) - pnorm((prior[[i]]$trunc[1]-prior[[i]]$mean)/prior[[i]]$sd)
       cc <- sum(prior[[i]]$weights*prior[[i]]$z)
-      prior[[i]]$weights <- prior[[i]]$weights/cc # DF: prior[[i]]$z # change weights with truncation # divide by cc instead to keep the same prior shape# does the truncation change the distribution shape in the non-truncated regions??
+      prior[[i]]$weights <- prior[[i]]$weights/cc
+      # DF: prior[[i]]$z
+      # change weights with truncation
+      # divide by cc instead to keep the same prior shape
+      # does the truncation change the distribution shape in the non-truncated regions??
 
       #Check for extrapolation
-      qq <- qnorm(c(0.0005, 0.9995), prior[[i]]$mean, prior[[i]]$sd)
+      qq <- qnorm(c(0.001, 0.999), prior[[i]]$mean, prior[[i]]$sd)
       if((qq[1] < 0 - 0.1) | (qq[2] > 1 + 0.1)){
         warning('You are asking the emulator to extrapolate. This is not reccomended.')
       }
@@ -325,8 +329,9 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scaled=FALSE){
         # }
       }
     }
-    if(scaled == FALSE){
-      Cf <- A_tform%*%Cf%*%t(A_tform)
+    if(scale01 == FALSE){
+      # Transform back to native space
+      Cf <- t(A_tform)%*%Cf%*%A_tform
     }
     Cf_post[[r]] <- Cf
   }
