@@ -1,4 +1,6 @@
 library(tictoc)
+library(lhs)
+library(BASS)
 f1 <- function(x) x[1]^2 + x[1]*x[2]
 f2 <- function(x, beta=1/9) x[1]^2 + x[1]*x[2] + beta*x[2]^3
 

@@ -1,3 +1,12 @@
+#' Trace of a matrix
+#'
+#' Shortcut for sum(diag(A))
+#'
+#' @param A a matrix
+#' @return The trace of a matrix
+#' @export
+tr <- function(A) sum(diag(A))
+
 #' The Borehole Function
 #'
 #' This function models the flow of water through a borehole.
