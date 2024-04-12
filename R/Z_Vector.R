@@ -1,4 +1,4 @@
-#' Estimate the Z Vector with BASS
+#' Estimate the Expected Gradient with BASS
 #'
 #' Closed form estimator of Z = E(\nabla f)
 #'
@@ -128,7 +128,6 @@ Z_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
       #}
       # Initalize arrays
       A <- B <- I4 <- I5 <- array(NA, dim=c(mod$pdes, M))
-
       for(i in 1:mod$pdes){
         prior_i <- prior[[i]]
         v <- apply(indic, 1, function(zz) match(i, zz))
@@ -153,6 +152,7 @@ Z_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
         t[is.na(t)] <- -Inf
 
         a <- b <- i4 <- i5 <- matrix(0, M)
+        #browser()
         for(m in 1:M){
           um <- u[m]
           ssm <- s[m]
@@ -163,16 +163,15 @@ Z_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
           b[m] <- ifelse(sm==1, Inf, tm)
 
           # Compute truncated moments
-          E0 <- XI_FUNC(0, a[m], b[m], prior_i)
-          E1 <- XI_FUNC(1, a[m], b[m], prior_i)
+          E0  <- XI_FUNC(0, a[m], b[m], prior_i)
+          E1  <- XI_FUNC(1, a[m], b[m], prior_i)
 
           if(is.nan(E1) | is.nan(E0)){
             browser()
-
           }
           # Compute integrals
-          i4[m] <- sm*um*E0
-          i5[m] <- ifelse(um == 0, sm*E0, sm*(E1 - tm*E0))
+          i4[m] <- ssm*um*E0
+          i5[m] <- ifelse(um == 0, 1, ssm*(E1 - tm*E0))
         }
 
           A[i,]  <- a
@@ -181,7 +180,7 @@ Z_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
           I5[i,] <- i5
       }
     }
-    browser()
+    #browser()
     #Reconstruct Constantine matrix
     Zf <- matrix(NA, nrow=mod$pdes)
     for(i in 1:mod$pdes){

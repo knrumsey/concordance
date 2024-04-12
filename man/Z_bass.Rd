@@ -2,7 +2,7 @@
 % Please edit documentation in R/Z_Vector.R
 \name{Z_bass}
 \alias{Z_bass}
-\title{Estimate the Z Vector with BASS}
+\title{Estimate the Expected Gradient with BASS}
 \usage{
 Z_bass(mod, prior = NULL, mcmc.use = NULL, scale01 = FALSE)
 }
