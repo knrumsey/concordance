@@ -19,7 +19,7 @@ Z_bass(mod, prior = NULL, mcmc.use = NULL, scale01 = FALSE)
 A list representing the posterior distribution of the Constantine matrix.
 }
 \description{
-Closed form estimator of Z = E(\nabla f)
+Closed form estimator of Z = E(gradient f)
 }
 \details{
 prior should be a list of length p (one object for each variable). Each element of prior should be a named list with fields.

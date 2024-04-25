@@ -79,6 +79,10 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   if(is.null(mcmc.use)){
     mcmc.use <- min(length(mod$s2), length(mod2$s2))
   }
+  # Check that the covariate matrix is the same
+  if(max(abs(mod1$xx.des - mod2$xx.des)) > 1e-9){
+    warning("Covariates are different (or are ordered differently) for mod1 and mod2. Results may be unreliable.")
+  }
   mcmc.use <- as.matrix(mcmc.use)
   if(ncol(mcmc.use) == 1){
     mcmc.use <- cbind(mcmc.use, mcmc.use)

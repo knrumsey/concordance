@@ -66,27 +66,57 @@ tmpf2 <- function(x) coactivity(x,1)[2]
 tmpf3 <- function(x) coactivity(x,2)[1]
 tmpf4 <- function(x) coactivity(x,2)[2]
 
-beta_vec <- seq(-15, 5, by=0.25)
+beta_vec <- seq(-10, 10, by=0.25)
 zz1 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf1(beta_vec[zz]))))
 zz2 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf2(beta_vec[zz]))))
 zz3 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf3(beta_vec[zz]))))
 zz4 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf4(beta_vec[zz]))))
 
-#png(filename="figs/simple_ex2.png", width=5, height=5, units="in", res=300)
+png(filename="figs/simple_ex2_v2.png", width=3.5, height=5, units="in", res=300)
 bob <- RColorBrewer::brewer.pal(2, "Set1")
-plot(NULL, xlim=c(-15, 5), ylim=range(c(zz1, zz2, zz3, zz4)),
-     xlab=expression(paste(beta)), ylab="Signed co-activity score", bty='n')
-points(beta_vec, zz1, col=bob[1], pch=15, cex=0.5, lwd=1)
-points(beta_vec, zz3, col=bob[1], pch=0, cex=0.5, lwd=1)
-points(beta_vec, zz2, col=bob[2], pch=16, cex=0.5, lwd=1)
-points(beta_vec, zz4, col=bob[2], pch=1, cex=0.5, lwd=1)
-legend("bottomright",
-       c(expression(paste(alpha[1],", q=1")),
-         expression(paste(alpha[1],", q=2")),
-         expression(paste(alpha[2],", q=1")),
-         expression(paste(alpha[2],", q=2"))),
-       bty='n', col=bob[c(1,1,2,2)], pch=c(15,0,16,1), cex=1)
-#dev.off()
+plot(NULL, xlim=c(-10, 10), ylim=range(c(zz1, zz2)),
+     xlab=expression(paste(beta)), ylab="Co-activity score", bty='n')
+points(beta_vec, zz1, col=bob[1], pch=15, cex=0.7, lwd=1)
+#points(beta_vec, zz3, col=bob[1], pch=0, cex=0.5, lwd=1)
+points(beta_vec, zz2, col=bob[2], pch=16, cex=0.7, lwd=1)
+#points(beta_vec, zz4, col=bob[2], pch=1, cex=0.5, lwd=1)
+#legend("bottomright",
+#       c(expression(paste(alpha[1],", q=1")),
+#         expression(paste(alpha[1],", q=2")),
+#         expression(paste(alpha[2],", q=1")),
+#         expression(paste(alpha[2],", q=2"))
+#         ),
+#       bty='n', col=bob[c(1,1,2,2)], pch=c(15,0,16,1), cex=1)
+legend("top",
+       c(expression(paste(alpha[1], ", q=1")),
+         expression(paste(alpha[2], ", q=1"))
+       ),
+       bty='n', col=bob[c(1,2)], pch=c(15,16), cex=1)
+dev.off()
+
+png(filename="figs/simple_ex2b_v2.png", width=3.5, height=5, units="in", res=300)
+bob <- RColorBrewer::brewer.pal(2, "Set1")
+plot(NULL, xlim=c(-10, 10), ylim=range(abs(c(zz3, zz4))),
+     xlab=expression(paste(beta)), ylab="Absolute signed co-activity score", bty='n')
+#points(beta_vec, zz1, col=bob[1], pch=15, cex=0.7, lwd=1)
+points(beta_vec, abs(zz3), col=bob[1], pch=15, cex=0.7, lwd=1)
+#points(beta_vec, zz2, col=bob[2], pch=16, cex=0.7, lwd=1)
+points(beta_vec, abs(zz4), col=bob[2], pch=16, cex=0.7, lwd=1)
+#legend("bottomright",
+#       c(expression(paste(alpha[1],", q=1")),
+#         expression(paste(alpha[1],", q=2")),
+#         expression(paste(alpha[2],", q=1")),
+#         expression(paste(alpha[2],", q=2"))
+#         ),
+#       bty='n', col=bob[c(1,1,2,2)], pch=c(15,0,16,1), cex=1)
+legend("top",
+       c(expression(paste("|", alpha[1], "|, q=2")),
+         expression(paste("|", alpha[2], "|, q=2"))
+       ),
+       bty='n', col=bob[c(1,2)], pch=c(15,16), cex=1)
+dev.off()
+
+
 
 # 2. Unsigned Activity Score
 tmpf1 <- function(x) coactivity2(x,1)[1]
@@ -94,27 +124,25 @@ tmpf2 <- function(x) coactivity2(x,1)[2]
 tmpf3 <- function(x) coactivity2(x,2)[1]
 tmpf4 <- function(x) coactivity2(x,2)[2]
 
-beta_vec <- seq(-15, 5, by=0.25)
+beta_vec <- seq(-10, 10, by=0.25)
 zz1 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf1(beta_vec[zz]))))
 zz2 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf2(beta_vec[zz]))))
 zz3 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf3(beta_vec[zz]))))
 zz4 <- Re(unlist(lapply(seq_along(beta_vec), function(zz) tmpf4(beta_vec[zz]))))
 
-#png(filename="figs/simple_ex3.png", width=5, height=5, units="in", res=300)
+png(filename="figs/simple_ex3_v2.png", width=3.5, height=5, units="in", res=300)
 bob <- RColorBrewer::brewer.pal(5, "Set1")
-plot(NULL, xlim=c(-15, 5), ylim=range(c(zz1, zz2, zz3, zz4)),
+plot(NULL, xlim=c(-10, 10), ylim=range(c(zz3, zz4)),
      xlab=expression(paste(beta)), ylab="Unsigned co-activity score", bty='n')
-points(beta_vec, zz1, col=bob[1], pch=15, cex=0.7, lwd=1)
-points(beta_vec, zz3, col=bob[1], pch=0, cex=0.7, lwd=1)
-points(beta_vec, zz2, col=bob[2], pch=16, cex=0.7, lwd=1)
-points(beta_vec, zz4, col=bob[2], pch=1, cex=0.7, lwd=1)
+#points(beta_vec, zz1, col=bob[1], pch=15, cex=0.7, lwd=1)
+points(beta_vec, zz3, col=bob[1], pch=15, cex=0.7, lwd=1)
+#points(beta_vec, zz2, col=bob[2], pch=16, cex=0.7, lwd=1)
+points(beta_vec, zz4, col=bob[2], pch=16, cex=0.7, lwd=1)
 legend("top",
-       c(expression(paste(tilde(alpha)[1],", q=1")),
-         expression(paste(tilde(alpha)[1],", q=2")),
-         expression(paste(tilde(alpha)[2],", q=1")),
-         expression(paste(tilde(alpha)[2],", q=2"))),
-       bty='n', col=bob[c(1,1,2,2)], pch=c(15, 0, 16,1), cex=1)
-##dev.off()
+       c(expression(paste(tilde(alpha)[1], ", q=2")),
+         expression(paste(tilde(alpha)[2], ", q=2"))),
+       bty='n', col=bob[c(1,2)], pch=c(15,16), cex=1)
+dev.off()
 
 # 3. Concordance Plot
 #png(filename="figs/simple_ex1.png", width=5, height=5, units="in", res=300)

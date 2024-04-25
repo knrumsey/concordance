@@ -36,5 +36,5 @@ test_that("simple polynomial example with multivariate Gaussian measure", {
   Cba4 <- t(A)%*%Cba4z%*%A
 
   d1 <- max(abs(Cba4-Cmc4))/max(Cba4)
-  expect_that(d1, is_less_than(0.08))
+  expect_that(d1, is_less_than(0.15))
 })

@@ -1,6 +1,6 @@
 #' Estimate the Expected Gradient with BASS
 #'
-#' Closed form estimator of Z = E(\nabla f)
+#' Closed form estimator of Z = E(gradient f)
 #'
 #' @param mod a fitted BASS model
 #' @param prior NULL (default) (0,1])prior for each variable. See details for required structure of prior

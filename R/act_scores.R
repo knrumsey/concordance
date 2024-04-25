@@ -60,7 +60,7 @@ coact_scores <- function(V, q=1, signed=TRUE, plt=FALSE, norm=FALSE){
   }
 
   if(plt){
-    plot(res, xlab="Inputs", ylab=paste0("Activity Score (", k, ")"), pch=16, cex=2, ylim=range(res))
+    plot(res, xlab="Inputs", ylab=paste0("Activity Score (", q, ")"), pch=16, cex=2, ylim=range(res))
   }
 
   return(res)
