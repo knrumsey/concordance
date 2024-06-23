@@ -62,12 +62,19 @@ C_mc <- function(f, measure, grad=FALSE, nmc=1e4, seed=NULL, ...){
 #'    - weights - vector of mixture weights (currently only compatible with dist="normal")
 #' @export
 C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
+  if(mod$pfunc > 0 && !isTRUE(mod$wasfunc)){
+    warning("A functional variable was detected. Model will be converted. Use function bassfunc2bass to surpress this warning.")
+    mod <- bassfunc2bass(mod)
+  }
   if(is.null(mcmc.use)){
     mcmc.use <- length(mod$nbasis)
   }
   gbass_flag <- "gbass" %in% class(mod)
-  if(gbass_flag){
+  bassfunc_flag <- isTRUE(mod$wasfunc)
+  if(gbass_flag || bassfunc_flag){
     mod$knotInd.des <- mod$knots.des
+  }else{
+    Xt <- mod$xx.des
   }
   # Parse the prior information
   if(is.null(prior)){
@@ -131,9 +138,6 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
 
   # Make constantine matrix
   Cf_post <- list()
-  if(!gbass_flag){
-    Xt <- mod$xx.des
-  }
   # Get transformation matrix
   A_tform <- diag(1/apply(mod$range.des, 2, diff))
   for(r in 1:length(mcmc.use)){
@@ -177,7 +181,7 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
         v <- apply(indic, 1, function(zz) match(i, zz))
         u <- !is.na(v)
         s <- apply(cbind(signs, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
-        if(gbass_flag){
+        if(gbass_flag || bassfunc_flag){
           t <- apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
         }else{
           t <- Xt[apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]]), i]

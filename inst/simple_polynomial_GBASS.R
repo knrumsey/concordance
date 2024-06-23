@@ -17,9 +17,9 @@ y <- apply(X, 1, f) + rnorm(n, 0, 0.01)
 y[1:n_corrupted] <- y[1:n_corrupted] + rnorm(n_corrupted, 0.5)
 
 #Fit BASS and GBASS Models
-mod0 <- bass(X, y)
-mod1 <- tbass(X, y, df=5)
-mod1 <- gm2bm(mod1)
+mod0 <- BASS::bass(X, y)
+mod1 <- GBASS::tbass(X, y, df=5)
+mod1 <- GBASS::gm2bm(mod1)
 
 # Get C matrices
 C0 <- C_bass(mod0)

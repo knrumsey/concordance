@@ -24,7 +24,7 @@ tr <- function(A) sum(diag(A))
 #' Kw in `[9855, 12045]` 	hydraulic conductivity of borehole (m/yr)
 #' @return The output of the borehole function
 #' @export
-borehole <- function(xx, design=0.5){
+f_borehole <- function(xx, design=0.5){
   rr<-matrix(c(
     0.01, 0.9,
     100, 50000,
