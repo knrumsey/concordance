@@ -4,7 +4,7 @@ library(BASS)
 f1 <- function(x) x[1]^2 + x[1]*x[2]
 f2 <- function(x, beta=1/9) x[1]^2 + x[1]*x[2] + beta*x[2]^3
 
-X <- lhs::maximinLHS(5000, 2)
+X <- lhs::randomLHS(1000, 2)
 y1 <- apply(X, 1, f1)
 y2 <- apply(X, 1, f2, beta=3)
 

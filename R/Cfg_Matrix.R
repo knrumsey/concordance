@@ -76,9 +76,12 @@ Cfg_mc <- function(f, g, measure, grad=FALSE, nmc=1e4, names = NULL, seed=NULL, 
 #' @export
 Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   mod <- mod1
-  if(mod$pfunc > 0 && !isTRUE(mod$wasfunc)){
-    warning("A functional variable was detected. Model will be converted. Use function bassfunc2bass to surpress this warning.")
-    mod <- bassfunc2bass(mod)
+  if(!is.null(mod$pfunc)){
+    if(mod$pfunc > 0 && !isTRUE(mod$wasfunc)){
+      warning("A functional variable was detected. Models will be converted. Use function bassfunc2bass to surpress this warning.")
+      mod <- bassfunc2bass(mod)
+      mod2 <- bassfunc2bass(mod2)
+    }
   }
   if(is.null(mcmc.use)){
     mcmc.use <- min(length(mod$s2), length(mod2$s2))
@@ -94,12 +97,14 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   if(ncol(mcmc.use) > 2){
     warning("ncol(mcmc.use) should not exceed 2")
   }
-  if(mod$p != mod2$p){
+  if(mod$pdes != mod$pdes){
     stop("Detected different number of variables in mod1 and mod2")
   }
+  gbass_flag <- "gbass" %in% class(mod)
   bassfunc_flag <- isTRUE(mod$wasfunc)
   if(gbass_flag || bassfunc_flag){
     mod$knotInd.des <- mod$knots.des
+    mod2$knotInd.des <- mod2$knots.des
   }
   # Parse the prior information
   if(is.null(prior)){
@@ -209,9 +214,9 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
       }
 
       # Initalize arrays
-      C <- A <- B <- I1 <- I2 <- I3 <- array(NA, dim=c(mod$p, M, M2))
-      I1b <- array(NA, dim=c(mod$p, M2, M))
-      for(i in 1:mod$p){
+      C <- A <- B <- I1 <- I2 <- I3 <- array(NA, dim=c(mod$pdes, M, M2))
+      I1b <- array(NA, dim=c(mod$pdes, M2, M))
+      for(i in 1:mod$pdes){
         prior_i <- prior[[i]]
         v <- apply(indic, 1, function(zz) match(i, zz))
         u <- !is.na(v)
@@ -231,18 +236,18 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
         if(gbass_flag || bassfunc_flag){
           t2 <- apply(cbind(knots2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]])
         }else{
-          t <- Xt[apply(cbind(knots2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]]), i]
+          t2 <- Xt[apply(cbind(knots2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]]), i]
         }
         # If this comes from BASS (rather than GBASS with gm2bm)
         # then we need to account for Devin's g-scaling-factors
-        #if(!("gbass" %in% class(mod))){
-        d <- 1/((s + 1)/2 - s*t)
-        s <- s*d
-        #}
-        #if(!("gbass" %in% class(mod2))){
-        #  d <- 1/((s2 + 1)/2 - s2*t2)
-        #  s2 <- s2*d
-        #}
+        if(!("gbass" %in% class(mod))){
+          d <- 1/((s + 1)/2 - s*t)
+          s <- s*d
+        }
+        if(!("gbass" %in% class(mod2))){
+          d <- 1/((s2 + 1)/2 - s2*t2)
+          s2 <- s2*d
+        }
         #NOTE!!! DOES THE ABOVE WORK? CAN I HAVE A GBASS AND A BASS MODEL?
 
         #Handle NA cases
@@ -338,22 +343,22 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
       I1 <- I1*C
       I2 <- I2*C
       I3 <- I3*C
-      for(iii in 1:mod$p){
+      for(iii in 1:mod$pdes){
         I1b[iii,,] <- I1b[iii,,] * t(C[iii,,])
       }
 
     }
     #Reconstruct Constantine matrix
-    Cfg <- matrix(NA, nrow=mod$p, ncol=mod$p)
-    for(i in 1:mod$p){
-      for(j in 1:mod$p){
+    Cfg <- matrix(NA, nrow=mod$pdes, ncol=mod$pdes)
+    for(i in 1:mod$pdes){
+      for(j in 1:mod$pdes){
         # #Naive way for now
         cij_curr <- 0
         if(i != j){
           for(m1 in 1:M){
             for(m2 in 1:M2){
               term <- coeff[m1]*coeff2[m2]*I1[i,m1,m2]*I1b[j,m2,m1]
-              for(k in (1:mod$p)[-c(i,j)]){
+              for(k in (1:mod$pdes)[-c(i,j)]){
                 term <- term * I2[k,m1,m2]
               }
               cij_curr <- cij_curr + term
@@ -363,7 +368,7 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
           for(m1 in 1:M){
             for(m2 in 1:M2){
               term <- coeff[m1]*coeff2[m2]*I3[i,m1,m2]
-              for(k in (1:mod$p)[-i]){
+              for(k in (1:mod$pdes)[-i]){
                 term <- term * I2[k,m1,m2]
               }
               cij_curr <- cij_curr + term
@@ -376,22 +381,22 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
 
         # if(i == j){
         #   cij_curr <- crossprod(coeff)*I3[i,,]
-        #   for(k in (1:mod$p)[-c(i)]){
+        #   for(k in (1:mod$pdes)[-c(i)]){
         #     cij_curr <- cij_curr * I2[k,,]
         #   }
         #   Cf[i,j] <- sum(cij_curr)
         # }else{
         #   cij_curr <- crossprod(coeff)*I1[i,,]*t(I1[j,,])
-        #   for(k in (1:mod$p)[-c(i,j)]){
+        #   for(k in (1:mod$pdes)[-c(i,j)]){
         #     cij_curr <- cij_curr * I2[k,,]
         #   }
         #   Cf[i,j] <- Cf[j,i] <- sum(cij_curr)
         # }
         # Matrix-y way of doing things (kinda)
         # This might save a little time when p is large, but the way I chose to code it (for time savings) has divide by zero problems if not careful
-        # if(mod$p > 30){
+        # if(mod$pdes > 30){
         #   I2_prod <- matrix(1, M, M)
-        #   for(k in (1:mod$p)){
+        #   for(k in (1:mod$pdes)){
         #     I2_prod <- I2_prod * I2[k,,]
         #   }
         #   if(i == j){
@@ -403,13 +408,13 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
         #A third way to do it
         # I2_prod <- matrix(1, M, M2)
         # if(i == j){
-        #   for(k in (1:mod$p)[-i]){
+        #   for(k in (1:mod$pdes)[-i]){
         #     I2_prod <- I2_prod * I2[k,,]
         #   }
         #   Iii <- I3[i,,] * I2_prod
         #   Cfg[i,i] <- coeff%*%Iii%*%t(coeff2)
         # }else{
-        #   for(k in (1:mod$p)[-c(i,j)]){
+        #   for(k in (1:mod$pdes)[-c(i,j)]){
         #     I2_prod <- I2_prod * I2[k,,]
         #   }
         #   Iij <- I1[i,,] * t(I1b[j,,]) * I2_prod

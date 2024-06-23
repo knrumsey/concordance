@@ -62,9 +62,11 @@ C_mc <- function(f, measure, grad=FALSE, nmc=1e4, seed=NULL, ...){
 #'    - weights - vector of mixture weights (currently only compatible with dist="normal")
 #' @export
 C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
-  if(mod$pfunc > 0 && !isTRUE(mod$wasfunc)){
-    warning("A functional variable was detected. Model will be converted. Use function bassfunc2bass to surpress this warning.")
-    mod <- bassfunc2bass(mod)
+  if(!is.null(mod$pfunc)){
+    if(mod$pfunc > 0 && !isTRUE(mod$wasfunc)){
+      warning("A functional variable was detected. Model will be converted. Use function bassfunc2bass to surpress this warning.")
+      mod <- bassfunc2bass(mod)
+    }
   }
   if(is.null(mcmc.use)){
     mcmc.use <- length(mod$nbasis)
