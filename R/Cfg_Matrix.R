@@ -76,6 +76,10 @@ Cfg_mc <- function(f, g, measure, grad=FALSE, nmc=1e4, names = NULL, seed=NULL, 
 #' @export
 Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   mod <- mod1
+  if(mod$pfunc > 0 && !isTRUE(mod$wasfunc)){
+    warning("A functional variable was detected. Model will be converted. Use function bassfunc2bass to surpress this warning.")
+    mod <- bassfunc2bass(mod)
+  }
   if(is.null(mcmc.use)){
     mcmc.use <- min(length(mod$s2), length(mod2$s2))
   }
@@ -93,8 +97,8 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   if(mod$p != mod2$p){
     stop("Detected different number of variables in mod1 and mod2")
   }
-  gbass_flag <- "gbass" %in% class(mod)
-  if(gbass_flag){
+  bassfunc_flag <- isTRUE(mod$wasfunc)
+  if(gbass_flag || bassfunc_flag){
     mod$knotInd.des <- mod$knots.des
   }
   # Parse the prior information
@@ -212,23 +216,33 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
         v <- apply(indic, 1, function(zz) match(i, zz))
         u <- !is.na(v)
         s <- apply(cbind(signs, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
-        t <- Xt[apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]]), i]
+        #t <- Xt[apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]]), i]
+        if(gbass_flag || bassfunc_flag){
+          t <- apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
+        }else{
+          t <- Xt[apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]]), i]
+        }
+
 
         v2 <- apply(indic2, 1, function(zz) match(i, zz))
         u2 <- !is.na(v2)
         s2 <- apply(cbind(signs2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]])
-        t2 <- Xt[apply(cbind(knots2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]]), i]
-
+        #t2 <- Xt[apply(cbind(knots2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]]), i]
+        if(gbass_flag || bassfunc_flag){
+          t2 <- apply(cbind(knots2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]])
+        }else{
+          t <- Xt[apply(cbind(knots2, v2), 1, function(zz) zz[zz[mod2$maxInt.des + 1]]), i]
+        }
         # If this comes from BASS (rather than GBASS with gm2bm)
         # then we need to account for Devin's g-scaling-factors
-        if(!("gbass" %in% class(mod))){
-          d <- 1/((s + 1)/2 - s*t)
-          s <- s*d
-        }
-        if(!("gbass" %in% class(mod2))){
-          d <- 1/((s2 + 1)/2 - s2*t2)
-          s2 <- s2*d
-        }
+        #if(!("gbass" %in% class(mod))){
+        d <- 1/((s + 1)/2 - s*t)
+        s <- s*d
+        #}
+        #if(!("gbass" %in% class(mod2))){
+        #  d <- 1/((s2 + 1)/2 - s2*t2)
+        #  s2 <- s2*d
+        #}
         #NOTE!!! DOES THE ABOVE WORK? CAN I HAVE A GBASS AND A BASS MODEL?
 
         #Handle NA cases
