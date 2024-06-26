@@ -99,11 +99,12 @@ C_bassPCA_v2 <- function(modPCA, prior=NULL, mcmc.use=NULL, func.use=NULL){
 #' @details This function works by converting the linear combination of bass models to a single bass model. See Cfg_bass for more details
 #' @export
 Cfg_bassPCA <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use=NULL){
-  if(class(modPCA) != "bassBasis") stop("modPCA must be an object with class bassBasis")
+  if(class(modPCA1) != "bassBasis") stop("modPCA must be an object with class bassBasis")
+  if(class(modPCA2) != "bassBasis") stop("modPCA must be an object with class bassBasis")
 
   # Get weights matrix
   phi1 <- modPCA1$dat$basis
-  phi2 <- modPCA1$dat$basis
+  phi2 <- modPCA2$dat$basis
   nfunc <- nrow(phi1)
   if(is.null(func.use)) func.use <- 1:nfunc
 

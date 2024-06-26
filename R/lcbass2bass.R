@@ -94,14 +94,16 @@ lcbass2bass <- function(mod_list, weights=rep(1, length(mod_list)), yy=NULL, mcm
       for(ii in 1:nbassmodels){
         mod_curr <- mod_list[[ii]]
         lookup_curr <- lookup[mm,ii] # first index of the arrays
-        tmp <- mod_curr$beta[mm,1:(1+nbasis[mm,ii])] * weights[ii]
+        nb_mm_ii <- nbasis[mm,ii]
+        #if(nb_mm_ii == 0) browser()
+        tmp <- mod_curr$beta[mm,1:(1+nb_mm_ii)] * weights[ii]
         beta0_curr <- tmp[1]
         beta_curr <- tmp[-1]
 
-        n.int_curr <- mod_curr$n.int.des[lookup_curr,1:nbasis[mm,ii],drop=FALSE]
-        knots_curr <- mod_curr$knotInd.des[lookup_curr,1:nbasis[mm,ii],]
-        signs_curr <- mod_curr$signs.des[lookup_curr,1:nbasis[mm,ii],]
-        vars_curr <- mod_curr$vars.des[lookup_curr,1:nbasis[mm,ii],]
+        n.int_curr <- mod_curr$n.int.des[lookup_curr,seq_along(beta_curr),drop=FALSE]
+        knots_curr <- mod_curr$knotInd.des[lookup_curr,seq_along(beta_curr),]
+        signs_curr <- mod_curr$signs.des[lookup_curr,seq_along(beta_curr),]
+        vars_curr <- mod_curr$vars.des[lookup_curr,seq_along(beta_curr),]
 
         if(ii == 1){
           n.int_cand <- n.int_curr
@@ -249,6 +251,8 @@ lcbass2bass <- function(mod_list, weights=rep(1, length(mod_list)), yy=NULL, mcm
   class(out) <- "bass"
   return(out)
 }
+
+
 
 
 
