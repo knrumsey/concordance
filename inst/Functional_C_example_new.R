@@ -1,17 +1,70 @@
 library(BASS)
 library(lhs)
 
-pollutant_modified <- function(X, xi, nfunc){
-  Z <- rep(NA, 4)
-  Z[1] <- X[1]
-  Z[2] <- X[2]
-  Z[3] <- (X[3]*2 + X[4])/3
-  Z[4] <- X[5]
-  duqling::pollutant(Z, space=xi, time=seq(0.3, 60, length.out=nfunc), scale01=TRUE)
+# Modified from duqling package. I also changed th priors from their default values
+my_pollutant <- function(x, scale01=FALSE,
+                      space=c(0.5, 1, 1.5, 2, 2.5),
+                      time=seq(from=0.3, to=60, by=0.3)){
+  if(scale01){
+    RR <- cbind(c(5,   5, 0.02, 0.01, 0.003, 30),
+                c(20, 20, 0.12,    3, 0.03,  31))
+    x[1:6] <- x[1:6]*(RR[,2] - RR[,1]) + RR[,1]
+  }
+
+
+  M1  <- x[1]
+  M2  <- x[2]
+  D   <- x[3]
+  L0  <- x[4]
+  Lt  <- x[5]
+  tau <- x[6]
+  L   <- L0 + Lt*tau
+  s   <- space
+  t   <- time
+
+
+  ds <- length(s)
+  dt <- length(t)
+  dY <- ds * dt
+  Y <- matrix(0, ds, dt)
+
+  # Create matrix Y, where each row corresponds to si and each column
+  # corresponds to tj.
+  for (ii in 1:ds) {
+    si <- s[ii]
+    for (jj in 1:dt) {
+      tj <- t[jj]
+
+      term1a <- M1 / sqrt(4*pi*D*tj)
+      term1b <- exp(-si^2 / (4*D*tj))
+      term1 <- term1a * term1b
+
+      term2 <- 0
+      if (tau < tj) {
+        term2a <- M2 / sqrt(4*pi*D*(tj-tau))
+        term2b <- exp(-(si-L)^2 / (4*D*(tj-tau)))
+        term2 <- term2a * term2b
+      }
+
+      C <- term1 + term2
+      Y[ii, jj] <- sqrt(4*pi) * C
+    }
+  }
+
+  # Convert the matrix into a vector (by rows).
+  Yrow <- t(Y)
+  y <- t(as.vector(Yrow))
+  return(y)
 }
 
-X <- lhs::maximinLHS(300, 5)
-nfunc <- 20
+pollutant_modified <- function(X, xi, nfunc){
+  my_pollutant(X, space=xi, time=seq(0.3, 60, length.out=nfunc), scale01=TRUE)
+}
+
+n <- 300
+p <- 6
+nfunc <- 30
+X <- lhs::maximinLHS(300, p)
 y1 <- apply(X, 1, pollutant_modified, xi=1.5, nfunc=nfunc) #+ rnorm(200, 0, 1)
 y2 <- apply(X, 1, pollutant_modified, xi=2.0, nfunc=nfunc) #+ rnorm(200, 0, 1)
 tt <- seq(0, 1, length.out=nfunc)
@@ -37,9 +90,8 @@ fitPCA1 <- bassPCA(X, y1, n.pc=np, n.cores=3)
 fitPCA2 <- bassPCA(X, y2, n.pc=np, n.cores=3)
 #conc_method2 <- conc_bass(fitPCA1, fitPCA2)
 
-
 conc_vec <- rep(NA, nfunc)
-K1 <- K2 <- K12 <- matrix(0, nrow=5, ncol=5)
+K1 <- K2 <- K12 <- matrix(0, nrow=p, ncol=p)
 for(t in 1:nfunc){
   print(t)
   mod_list <- fitPCA1$mod.list
@@ -66,10 +118,18 @@ conc2 <- mean(conc_vec)
 #matplot(y2, type='l', lty=1, col=adjustcolor("grey", alpha.f=0.25), add=TRUE)
 
 
-plot(conc_vec, type='o', pch=16, lwd=2, xlab="t")
+plot(tt, conc_vec, type='l', pch=16, lwd=2, xlab="t", ylab="concordance",
+     ylim=c(min(c(conc_vec,0)), 1.1), yaxt='n')
+axis(2, seq(-1, 1, by=0.2), seq(-1, 1, by=0.2))
 abline(h=conc_method1b$conc, lwd=2, lty=2, col='dodgerblue')
-abline(h=conc1, lwd=2, lty=2, col='orange')
-abline(h=conc2, lwd=2, lty=2, col='firebrick')
-
+abline(h=conc1, lwd=2, lty=3, col='orange')
+abline(h=conc2, lwd=2, lty=4, col='firebrick')
+lines(tt, conc_vec, lwd=3)
+legend("top", c(expression(paste(kappa["fg"],"(t),")),
+                expression(paste(kappa["fg"]^"0",",")),
+                expression(paste(kappa["fg"]^"1", ",")),
+                expression(paste(kappa["fg"]^"2"))),
+       lwd=2, lty=1:4, col=c("black", "dodgerblue", "orange", "firebrick"),
+       horiz=TRUE, bty='n')
 
 

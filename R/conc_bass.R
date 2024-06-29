@@ -90,9 +90,9 @@ conc_bassPCA <- function(modPCA1, modPCA2, prior = NULL, mcmc.use=NULL, type=1, 
   out$conc_total2 <- conc_total2
 
   # Get K matrices
-  out$Kf <- K_bassPCA(modPCA1, type, prior, prior_func, mcmc,use, func,use)
-  out$Kg <- K_bassPCA(modPCA2, type, prior, prior_func, mcmc,use, func,use)
-  out$Kfg <- K_bassPCA(modPCA1, modPCA2, type, prior, prior_func, mcmc,use, func,use)
+  out$Kf  <- K_bassPCA(modPCA1, type, prior, prior_func, mcmc.use, func.use)
+  out$Kg  <- K_bassPCA(modPCA2, type, prior, prior_func, mcmc.use, func.use)
+  out$Kfg <- K_bassPCA(modPCA1, modPCA2, type, prior, prior_func, mcmc.use, func.use)
 
   # Get conc_total (using K's)
   if(is.matrix(out$Kfg)){
