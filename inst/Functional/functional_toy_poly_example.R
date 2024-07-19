@@ -5,7 +5,7 @@ f1 <- function(x, tt){
   res <- rep(x[1]^2 + x[1]*x[2], length(tt))
 }
 
-f2 <- function(x, tt, a=aa, b=bb){
+f2 <- function(x, tt, a=0, b=15){
   x[1]^2 + x[1]*x[2] + (tt*(b-a) + a)*x[2]^3
 }
 

@@ -6,8 +6,8 @@ my_pollutant <- function(x, scale01=FALSE,
                       space=c(0.5, 1, 1.5, 2, 2.5),
                       time=seq(from=0.3, to=60, by=0.3)){
   if(scale01){
-    RR <- cbind(c(5,   5, 0.02, 0.01, 0.003, 30),
-                c(20, 20, 0.12,    3, 0.03,  31))
+    RR <- cbind(c(5,   5, 0.02, 0.01, 0.003, 28),
+                c(15, 15, 0.12,    3, 0.03,  32))
     x[1:6] <- x[1:6]*(RR[,2] - RR[,1]) + RR[,1]
   }
 
@@ -85,7 +85,7 @@ conc_method1b <- conc_bass(fit1_modified, fit2_modified)
 # sob1 <- sobol(fit1_modified) # need to fix this, i think it has to do with knots instead of knot locations.
 
 # METHOD TWO (Analyze as a function of t)
-np <- BASS:::bassPCAsetup(X, y1)$n.pc
+#np <- BASS:::bassPCAsetup(X, y1)$n.pc
 fitPCA1 <- bassPCA(X, y1, n.pc=np, n.cores=3)
 fitPCA2 <- bassPCA(X, y2, n.pc=np, n.cores=3)
 #conc_method2 <- conc_bass(fitPCA1, fitPCA2)
