@@ -41,6 +41,7 @@ fit1 <- bass(X, y1, xx.func=tt)
 fit2 <- bass(X, y2, xx.func=tt)
 conc_method1 <- conc_bass(fit1, fit2)
 
+# same thing but slightly more rigorous
 fit1_modified <- bassfunc2bass(fit1)
 fit2_modified <- bassfunc2bass(fit2)
 conc_method1b <- conc_bass(fit1_modified, fit2_modified)

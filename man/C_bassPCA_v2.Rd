@@ -9,7 +9,7 @@ C_bassPCA_v2(modPCA, prior = NULL, mcmc.use = NULL, func.use = NULL)
 \arguments{
 \item{modPCA}{a fitted model of class bassBasis from bassPCA function}
 
-\item{prior}{NULL (default) \verb{[0, 1]} prior for each variable. See details for required structure of prior}
+\item{prior}{NULL (default) \code{[0, 1]} prior for each variable. See details for required structure of prior}
 
 \item{mcmc.use}{vector of mcmc indices to be used for both models. Otherwise, a matrix}
 
@@ -20,7 +20,7 @@ A list returning the (posterior samples?) of the C matrix for each point specifi
 }
 \description{
 Closed form estimator of the C(t) matrix using a BASS model.
-An alternative approach see details.
+An alternative approach see details. This approach is usually faster than the alternative.
 }
 \details{
 This function works by decomposing the C of a linear combination into the pairwise Cfg matrices of the components. See C_bass for more details

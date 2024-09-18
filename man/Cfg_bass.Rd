@@ -4,7 +4,7 @@
 \alias{Cfg_bass}
 \title{Estimate Cfg with BASS}
 \usage{
-Cfg_bass(mod1, mod2, prior = NULL, mcmc.use = NULL)
+Cfg_bass(mod1, mod2, prior = NULL, mcmc.use = NULL, scale01 = FALSE)
 }
 \arguments{
 \item{mod1}{a fitted BASS model for first function}
@@ -13,7 +13,9 @@ Cfg_bass(mod1, mod2, prior = NULL, mcmc.use = NULL)
 
 \item{prior}{NULL (default) \verb{[0, 1]} prior for each variable. See details for required structure of prior}
 
-\item{mcmc.use}{vector of mcmc indices to be used for both models. Otherwise, a matrix}
+\item{mcmc.use}{vector of mcmc indices to be used for both models. Otherwise, a 2-column matrix with a pair of indices in each row.}
+
+\item{scale01}{logical (default FALSE). When TRUE, the the C matix corresponds to the (0, 1)-scaled inputs rather than the original inputs.}
 }
 \value{
 A list representing the posterior distribution of the Co-Constantine matrix (Cfg).

@@ -33,10 +33,10 @@ C_bassPCA <- function(modPCA, prior=NULL, mcmc.use=NULL, func.use=NULL){
 #' Estimate C matrix with bassPCA as a function of t
 #'
 #' Closed form estimator of the C(t) matrix using a BASS model.
-#' An alternative approach see details.
+#' An alternative approach see details. This approach is usually faster than the alternative.
 #'
 #' @param modPCA a fitted model of class bassBasis from bassPCA function
-#' @param prior NULL (default) `[0, 1]` prior for each variable. See details for required structure of prior
+#' @param prior NULL (default) \code{[0, 1]} prior for each variable. See details for required structure of prior
 #' @param mcmc.use vector of mcmc indices to be used for both models. Otherwise, a matrix
 #' @param func.use a vector of points of the functional variable to use
 #' @return A list returning the (posterior samples?) of the C matrix for each point specified in func.use
@@ -54,7 +54,7 @@ C_bassPCA_v2 <- function(modPCA, prior=NULL, mcmc.use=NULL, func.use=NULL){
   mod_list <- modPCA$mod.list
 
   # Get Cij for all model pairs
-  nbassmodels <- length(modPCA)
+  nbassmodels <- length(mod_list)
   Cij <- list()
   cnt <- 1
   for(i in 1:nbassmodels){
@@ -67,21 +67,44 @@ C_bassPCA_v2 <- function(modPCA, prior=NULL, mcmc.use=NULL, func.use=NULL){
       cnt <- cnt + 1
     }
   }
-  p <- nrow(Cij[[1]])
+  if(is.null(mcmc.use)){
+    # If null, just use last mcmc iteration
+    mcmc.use <- length(mod_list[[1]]$nbasis)
+  }
+  if(length(mcmc.use) == 1){
+    p <- nrow(Cij[[1]])
+  }else{
+    p <- nrow(Cij[[1]][[1]])
+  }
 
   # Assemble C list for each t
   Ct <- list()
-  cnt <- 1
   for(t in seq_along(func.use)){
+    cnt <- 1
     tt <- func.use[t]
-    Ctmp <- matrix(0, nrow=p, ncol=p)
+    # Initialize Ctmp
+    Ctmp <- list()
+    for(k in seq_along(mcmc.use)){
+      Ctmp[[k]] <- matrix(0, nrow=p, ncol=p)
+    }
     for(i in 1:nbassmodels){
       for(j in 1:nbassmodels){
-        Ctmp <- Ctmp + phi[tt,i]*phi[tt,j]*Cij[[cnt]]
+        curr <- Cij[[cnt]]
+        for(k in seq_along(mcmc.use)){
+          if(length(mcmc.use) == 1){
+            Ctmp[[k]] <- Ctmp[[k]] + phi[tt,i]*phi[tt,j]*Cij[[cnt]]
+          }else{
+            Ctmp[[k]] <- Ctmp[[k]] + phi[tt,i]*phi[tt,j]*Cij[[cnt]][[k]]
+          }
+        }
         cnt <- cnt + 1
       }
     }
-    Ct[[t]] <- Ctmp
+    if(length(mcmc.use) == 1){
+      Ct[[t]] <- Ctmp[[1]]
+    }else{
+      Ct[[t]] <- Ctmp
+    }
   }
   return(Ct)
 }
@@ -111,7 +134,7 @@ Cfg_bassPCA <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use=NU
   # Get model list
   mod_list1 <- modPCA1$mod.list
   mod_list2 <- modPCA2$mod.list
-  if(is.null(mcmc.use)) mcmc.use <- 1:length(mod_list1[[1]]$s2)
+  #if(is.null(mcmc.use)) mcmc.use <- 1:length(mod_list1[[1]]$s2)
 
   Cfgt <- list()
   for(t in seq_along(func.use)){
@@ -144,8 +167,8 @@ Cfg_bassPCA_v2 <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use
   # Get weights matrix
   phi1 <- modPCA1$dat$basis
   phi2 <- modPCA2$dat$basis
-  if(any(dim(phi1) != dim(phi2))){
-    stop("modPCA$dat$basis should hve the same dimension for both models.")
+  if(nrow(phi1) != nrow(phi2)){
+    stop("modPCA$dat$basis should have the same number of rows for both models.")
   }
   nfunc <- nrow(phi1)
   if(is.null(func.use)) func.use <- 1:nfunc
@@ -155,8 +178,8 @@ Cfg_bassPCA_v2 <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use
   mod_list2 <- modPCA2$mod.list
 
   # Get Cij for all model pairs
-  nbassmodels1 <- length(modPCA1)
-  nbassmodels2 <- length(modPCA2)
+  nbassmodels1 <- length(mod_list1)
+  nbassmodels2 <- length(mod_list2)
   Cij <- list()
   cnt <- 1
   for(i in 1:nbassmodels1){
@@ -165,21 +188,43 @@ Cfg_bassPCA_v2 <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use
       cnt <- cnt + 1
     }
   }
-  p <- nrow(Cij[[1]])
+  if(is.null(mcmc.use)){
+    # If null, just use last mcmc iteration
+    mcmc.use <- length(mod_list[[1]]$nbasis)
+  }
+  if(length(mcmc.use) == 1){
+    p <- nrow(Cij[[1]])
+  }else{
+    p <- nrow(Cij[[1]][[1]])
+  }
 
   # Assemble C list for each t
   Cfgt <- list()
-  cnt <- 1
   for(t in seq_along(func.use)){
+    cnt <- 1
     tt <- func.use[t]
-    Ctmp <- matrix(0, nrow=p, ncol=p)
+    # Initialize Ctmp
+    Ctmp <- list()
+    for(k in seq_along(mcmc.use)){
+      Ctmp[[k]] <- matrix(0, nrow=p, ncol=p)
+    }
     for(i in 1:nbassmodels1){
       for(j in 1:nbassmodels2){
-        Ctmp <- Ctmp + phi1[tt,i]*phi2[tt,j]*Cij[[cnt]]
+        for(k in seq_along(mcmc.use)){
+          if(length(mcmc.use) == 1){
+            Ctmp[[k]] <- Ctmp[[k]] + phi1[tt,i]*phi2[tt,j]*Cij[[cnt]]
+          }else{
+            Ctmp[[k]] <- Ctmp[[k]] + phi1[tt,i]*phi2[tt,j]*Cij[[cnt]][[k]]
+          }
+        }
         cnt <- cnt + 1
       }
     }
-    Cfgt[[t]] <- Ctmp
+    if(length(mcmc.use) == 1){
+      Cfgt[[t]] <- Ctmp[[1]]
+    }else{
+      Cfgt[[t]] <- Ctmp
+    }
   }
   return(Cfgt)
 }

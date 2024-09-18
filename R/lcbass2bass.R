@@ -26,6 +26,7 @@ lcbass2bass <- function(mod_list, weights=rep(1, length(mod_list)), yy=NULL, mcm
   # Quick pass over models (nothing expensive)
   nbassmodels <- length(mod_list)
   nmcmc <- length(mcmc.use)
+
   # These fields are the same for each model (assumption)
   mod_curr <- mod_list[[1]]
   nobs <- length(mod_curr$y)
@@ -39,31 +40,35 @@ lcbass2bass <- function(mod_list, weights=rep(1, length(mod_list)), yy=NULL, mcm
 
   # These fields may be different for each bass model
   # or they might change over the course of the code
-  nbasis   <- mod_curr$nbasis[mcmc.use]
+  nbasis   <- matrix(mod_curr$nbasis[mcmc.use], ncol=1)
   n.models <- length(unique(mod_curr$model.lookup[mcmc.use]))
-  z <- mod_curr$y
+  z <- matrix(mod_curr$y, ncol=1)
   yhat <- weights[1]*mod_curr$yhat[mcmc.use,]
   yhat.mean <- weights[1]*mod_curr$yhat.mean
-  lam <- mod_curr$lam[mcmc.use]
+  lam <- matrix(mod_curr$lam[mcmc.use], ncol=1)
   s2 <- weights[1]^2*mod_curr$s2[mcmc.use]
-  beta.prec <- mod_curr$beta.prec[mcmc.use]
+  beta.prec <- matrix(mod_curr$beta.prec[mcmc.use], ncol=1)
   degree <- mod_curr$degree
   maxInt.des <- mod_curr$maxInt.des
-  lookup <- mod_curr$model.lookup[mcmc.use]
-  for(i in 2:nbassmodels){
-    mod_curr <- mod_list[[i]]
-    nbasis <- cbind(nbasis, mod_curr$nbasis[mcmc.use])
-    n.models <- c(n.models, length(unique(mod_curr$model.lookup[mcmc.use])))
-    z <- cbind(z, mod_curr$y)
-    yhat <- weights[i]*mod_curr$yhat[mcmc.use,]
-    yhat.mean <- weights[i]*mod_curr$yhat.mean
-    lam <- cbind(lam, mod_curr$lam)
-    s2 <- weights[i]^2*mod_curr$s2
-    beta.prec <- cbind(beta.prec, mod_curr$beta.prec[mcmc.use])
-    degree <- c(degree, mod_curr$degree)
-    maxInt.des <- c(maxInt.des, mod_curr$maxInt.des)
-    lookup <- cbind(lookup, mod_curr$model.lookup[mcmc.use])
+  lookup <- matrix(mod_curr$model.lookup[mcmc.use], nrow=length(mcmc.use), ncol=1)
+
+  if(nbassmodels > 1){
+    for(i in 2:nbassmodels){
+      mod_curr <- mod_list[[i]]
+      nbasis <- cbind(nbasis, mod_curr$nbasis[mcmc.use])
+      n.models <- c(n.models, length(unique(mod_curr$model.lookup[mcmc.use])))
+      z <- cbind(z, mod_curr$y)
+      yhat <- weights[i]*mod_curr$yhat[mcmc.use,]
+      yhat.mean <- weights[i]*mod_curr$yhat.mean
+      lam <- cbind(lam, mod_curr$lam)
+      s2 <- weights[i]^2*mod_curr$s2
+      beta.prec <- cbind(beta.prec, mod_curr$beta.prec[mcmc.use])
+      degree <- c(degree, mod_curr$degree)
+      maxInt.des <- c(maxInt.des, mod_curr$maxInt.des)
+      lookup <- cbind(lookup, mod_curr$model.lookup[mcmc.use])
+    }
   }
+
   # Extract information about the final model
   maxBasis <- max(apply(nbasis, 1, sum))
   maxInt <- max(maxInt.des)
@@ -153,7 +158,6 @@ lcbass2bass <- function(mod_list, weights=rep(1, length(mod_list)), yy=NULL, mcm
         # If duplicate, just set lookup and nbasis to previous values
         lookupFull[mm] <- lookupFull[mm-1]
         nbasisFull[mm] <- nbasisFull[mm-1]
-        print("heyo")
       }else{
         # If not duplicate, add everything to the full model
         nbasis_curr   <- length(n.int_cand)

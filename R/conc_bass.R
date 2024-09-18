@@ -6,9 +6,9 @@
 #' @param mod2 a fitted BASS model for second function
 #' @param prior NULL (default) `[0, 1]` prior for each variable. See details for required structure of prior
 #' @param mcmc.use vector of mcmc indices to be used for both models. Otherwise, a matrix
-#' @param type Only used if class(mod1) == class(mod2) == "bassBasis". See \code{C_bassPCA}, \code{C_bassPCA_v2}, \code{Cfg_bassPCA}, and \code{Cfg_bassPCA_v2} for details
-#' @param prior_func Only used if class(mod1) == class(mod2) == "bassBasis". See \code{C_bassPCA}, \code{C_bassPCA_v2}, \code{Cfg_bassPCA}, and \code{Cfg_bassPCA_v2} for details
-#' @param func.use Only used if class(mod1) == class(mod2) == "bassBasis". See \code{C_bassPCA}, \code{C_bassPCA_v2}, \code{Cfg_bassPCA}, and \code{Cfg_bassPCA_v2} for details
+#' @param type Only used if class(mod1) == class(mod2) == "bassBasis". The default \code{type=1} calls \code{C_bassPCA_v2} and any other value calls \code{C_bassPCA}.
+#' @param prior_func Only used if class(mod1) == class(mod2) == "bassBasis". Optional weights for the prior on the functional variable.
+#' @param func.use Only used if class(mod1) == class(mod2) == "bassBasis".
 #' @return A list with matrices Cf, Cg, Cfg, Vfg and the concordance.
 #' @details
 #' When models are class bass, each field of the returned object is a list for each mcmc iteration (or a vector for concordance). If mcmc.use = NULL or length(mcmc.use) = 1, then each field is just a matrix (or a scalar for concordance).
@@ -48,13 +48,13 @@ conc_bass <- function(mod1, mod2, prior=NULL, mcmc.use=NULL, type=1, prior_func=
 conc_bassPCA <- function(modPCA1, modPCA2, prior = NULL, mcmc.use=NULL, type=1, prior_func=NULL, func.use=NULL){
   out <- list()
   if(type == 1){
-    out$Cf <- C_bassPCA(modPCA1, prior, mcmc.use, func.use)
-    out$Cg <- C_bassPCA(modPCA2, prior, mcmc.use, func.use)
-    out$Cfg <- Cfg_bassPCA(modPCA1, modPCA2, prior, mcmc.use, func.use)
-  }else{
     out$Cf <- C_bassPCA_v2(modPCA1, prior, mcmc.use, func.use)
     out$Cg <- C_bassPCA_v2(modPCA2, prior, mcmc.use, func.use)
     out$Cfg <- Cfg_bassPCA_v2(modPCA1, modPCA2, prior, mcmc.use, func.use)
+  }else{
+    out$Cf <- C_bassPCA(modPCA1, prior, mcmc.use, func.use)
+    out$Cg <- C_bassPCA(modPCA2, prior, mcmc.use, func.use)
+    out$Cfg <- Cfg_bassPCA(modPCA1, modPCA2, prior, mcmc.use, func.use)
   }
 
   nfunc <- length(func.use)

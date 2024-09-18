@@ -60,7 +60,8 @@ Cfg_mc <- function(f, g, measure, grad=FALSE, nmc=1e4, names = NULL, seed=NULL, 
 #' @param mod1 a fitted BASS model for first function
 #' @param mod2 a fitted BASS model for second function
 #' @param prior NULL (default) `[0, 1]` prior for each variable. See details for required structure of prior
-#' @param mcmc.use vector of mcmc indices to be used for both models. Otherwise, a matrix
+#' @param mcmc.use vector of mcmc indices to be used for both models. Otherwise, a 2-column matrix with a pair of indices in each row.
+#' @param scale01 logical (default FALSE). When TRUE, the the C matix corresponds to the (0, 1)-scaled inputs rather than the original inputs.
 #' @return A list representing the posterior distribution of the Co-Constantine matrix (Cfg).
 #' @details prior should be a list of length p (one object for each variable). Each element of prior should be a named list with fields
 #'
@@ -74,7 +75,7 @@ Cfg_mc <- function(f, g, measure, grad=FALSE, nmc=1e4, names = NULL, seed=NULL, 
 #'
 #'    weights - vector of mixture weights (mixture of normals only)
 #' @export
-Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
+Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL, scale01=FALSE){
   mod <- mod1
   if(!is.null(mod$pfunc)){
     if(mod$pfunc > 0 && !isTRUE(mod$wasfunc)){
@@ -97,7 +98,7 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   if(ncol(mcmc.use) > 2){
     warning("ncol(mcmc.use) should not exceed 2")
   }
-  if(mod$pdes != mod$pdes){
+  if(mod$pdes != mod2$pdes){
     stop("Detected different number of variables in mod1 and mod2")
   }
   gbass_flag <- "gbass" %in% class(mod)
@@ -121,7 +122,7 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
     }
     prior[[i]]$trunc <- scale_range(prior[[i]]$trunc, mod$range.des[,i])
 
-    # 2. Handle ach distribution type separately
+    # 2. Handle each distribution type separately
     distribution = prior[[i]]$dist
     if(distribution == "normal"){
       if(is.null(prior[[i]]$weights)){
@@ -163,8 +164,8 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
   }
 
   # Make constantine matrix
-
   Cfg_post <- list()
+  A_tform <- diag(1/apply(mod$range.des, 2, diff))
   Xt <- mod$xx.des
   for(r in 1:nrow(mcmc.use)){
     #Compute only the stuff we will need for every iteration
@@ -227,7 +228,6 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
         }else{
           t <- Xt[apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]]), i]
         }
-
 
         v2 <- apply(indic2, 1, function(zz) match(i, zz))
         u2 <- !is.na(v2)
@@ -422,6 +422,10 @@ Cfg_bass <- function(mod1, mod2, prior = NULL, mcmc.use=NULL){
         # }
 
       }
+    }
+    if(scale01 == FALSE){
+      # Transform back to native space
+      Cfg <- t(A_tform)%*%Cfg%*%A_tform
     }
     Cfg_post[[r]] <- Cfg
   }

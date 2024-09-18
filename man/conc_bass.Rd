@@ -23,11 +23,11 @@ conc_bass(
 
 \item{mcmc.use}{vector of mcmc indices to be used for both models. Otherwise, a matrix}
 
-\item{type}{Only used if class(mod1) == class(mod2) == "bassBasis". See \code{C_bassPCA}, \code{C_bassPCA_v2}, \code{Cfg_bassPCA}, and \code{Cfg_bassPCA_v2} for details}
+\item{type}{Only used if class(mod1) == class(mod2) == "bassBasis". The default \code{type=1} calls \code{C_bassPCA_v2} and any other value calls \code{C_bassPCA}.}
 
-\item{prior_func}{Only used if class(mod1) == class(mod2) == "bassBasis". See \code{C_bassPCA}, \code{C_bassPCA_v2}, \code{Cfg_bassPCA}, and \code{Cfg_bassPCA_v2} for details}
+\item{prior_func}{Only used if class(mod1) == class(mod2) == "bassBasis". Optional weights for the prior on the functional variable.}
 
-\item{func.use}{Only used if class(mod1) == class(mod2) == "bassBasis". See \code{C_bassPCA}, \code{C_bassPCA_v2}, \code{Cfg_bassPCA}, and \code{Cfg_bassPCA_v2} for details}
+\item{func.use}{Only used if class(mod1) == class(mod2) == "bassBasis".}
 }
 \value{
 A list with matrices Cf, Cg, Cfg, Vfg and the concordance.
