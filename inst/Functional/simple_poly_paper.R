@@ -49,6 +49,9 @@ Kfg_true <- function(){
   res <- matrix(c(32, 53, 11, 16), nrow=2, byrow=TRUE)/144
   return(res)
 }
+conc_dir_true <- tr(Kfg_true())/sqrt(tr(Kf_true())*tr(Kg_true()))
+conc_jit_true <- integrate(conc_true, lower=0, upper=1)$value
+
 
 # Generate training data
 p <- 2

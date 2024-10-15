@@ -165,180 +165,187 @@ C_bass <- function(mod, prior = NULL, mcmc.use=NULL, scale01=FALSE){
       signs      <- mod$signs.des[mod_number, 1:M, ]
       indic      <- mod$vars.des[mod_number, 1:M, ]
       knots      <- mod$knotInd.des[mod_number, 1:M, ]
-      if(M==1){
-        signs <- matrix(signs, nrow=1, ncol=length(signs))
-        indic <- matrix(indic, nrow=1, ncol=length(indic))
-        knots <- matrix(knots, nrow=1, ncol=length(knots))
-      }
-      #if(gbass_flag){
-      #  knots    <- mod$knots.des[mod_number, 1:M, ]
-      #}else{
-      #  knots    <- mod$knotInd.des[mod_number, 1:M, ]
-      #}
-      # Initalize arrays
-      C <- A <- B <- I1 <- I2 <- I3 <- array(NA, dim=c(mod$pdes, M, M))
-
-      for(i in 1:mod$pdes){
-        prior_i <- prior[[i]]
-        v <- apply(indic, 1, function(zz) match(i, zz))
-        u <- !is.na(v)
-        s <- apply(cbind(signs, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
-        if(gbass_flag || bassfunc_flag){
-          t <- apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
-        }else{
-          t <- Xt[apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]]), i]
+      if(M==0){
+        Cf <- matrix(0, nrow=mod$pdes, ncol=mod$pdes)
+      }else{
+        if(M==1){
+          signs <- matrix(signs, nrow=1, ncol=length(signs))
+          indic <- matrix(indic, nrow=1, ncol=length(indic))
+          knots <- matrix(knots, nrow=1, ncol=length(knots))
         }
-
-        # If this comes from BASS (rather than GBASS with gm2bm)
-        # then we need to account for Devin's g-scaling-factors
-        #if(!gbass_flag){
-        d <- 1/((s + 1)/2 - s*t)
-        s <- s*d
+        #if(gbass_flag){
+        #  knots    <- mod$knots.des[mod_number, 1:M, ]
+        #}else{
+        #  knots    <- mod$knotInd.des[mod_number, 1:M, ]
         #}
+        # Initalize arrays
+        C <- A <- B <- I1 <- I2 <- I3 <- array(NA, dim=c(mod$pdes, M, M))
 
-        #Handle NA cases
-        s[is.na(s)] <- 1
-        t[is.na(t)] <- -Inf
+        for(i in 1:mod$pdes){
+          prior_i <- prior[[i]]
+          v <- apply(indic, 1, function(zz) match(i, zz))
+          u <- !is.na(v)
+          s <- apply(cbind(signs, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
+          if(gbass_flag || bassfunc_flag){
+            t <- apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]])
+          }else{
+            t <- Xt[apply(cbind(knots, v), 1, function(zz) zz[zz[mod$maxInt.des + 1]]), i]
+          }
 
-        # Get integration constants
-        c1 <- tcrossprod(s)
-        C[i,,] <- c1
+          # If this comes from BASS (rather than GBASS with gm2bm)
+          # then we need to account for Devin's g-scaling-factors
+          #if(!gbass_flag){
+          d <- 1/((s + 1)/2 - s*t)
+          s <- s*d
+          #}
 
-        a <- bp <- i1 <- i2 <- i3 <- matrix(0, M, M)
-        for(m1 in 1:M){
-          for(m2 in m1:M){
-            um  <- u[c(m1, m2)]
-            ssm <- s[c(m1, m2)]
-            sm  <- sign(ssm)
-            tm  <- t[c(m1, m2)]
+          #Handle NA cases
+          s[is.na(s)] <- 1
+          t[is.na(t)] <- -Inf
 
-            if(sm[1] == 1 & sm[2] == 1){
-              a[m1,m2]  <- a[m2,m1]  <- max(tm)
-              bp[m1,m2] <- bp[m2,m1] <- Inf
-            }
-            if(sm[1] == 1 & sm[2] == -1){
-              a[m1,m2]  <- a[m2,m1]  <- tm[1]
-              bp[m1,m2] <- bp[m2,m1] <- tm[2]
-            }
-            if(sm[1] == -1 & sm[2] == 1){
-              a[m1,m2]  <- a[m2,m1]  <- tm[2]
-              bp[m1,m2] <- bp[m2,m1] <- tm[1]
-            }
-            if(sm[1] == -1 & sm[2] == -1){
-              a[m1,m2]  <- a[m2,m1]  <- -Inf
-              bp[m1,m2] <- bp[m2,m1] <- min(tm)
-            }
-            aa <- a[m1,m2]
-            bb <-  max(a[m1,m2], bp[m1,m2])
+          # Get integration constants
+          c1 <- tcrossprod(s)
+          C[i,,] <- c1
 
-            # Compute integrals
-            #E0 <- Efunc(0, aa, bb, prior_i)
-            #E1 <- Efunc(1, aa, bb, prior_i)
-            #E2 <- Efunc(2, aa, bb, prior_i)
+          a <- bp <- i1 <- i2 <- i3 <- matrix(0, M, M)
+          for(m1 in 1:M){
+            for(m2 in m1:M){
+              um  <- u[c(m1, m2)]
+              ssm <- s[c(m1, m2)]
+              sm  <- sign(ssm)
+              tm  <- t[c(m1, m2)]
 
-            E0 <- XI_FUNC(0, aa, bb, prior_i)
-            E1 <- XI_FUNC(1, aa, bb, prior_i)
-            E2 <- NULL #Only compute when needed
-
-            if(is.nan(E1) | is.nan(E0)){
-              browser()
-            }
-
-            # Start with I3
-            if(um[1] == 0 | um[2] == 0){
-              i3[m1,m2] <- i3[m2,m1] <- 0
-            }else{
-              i3[m1,m2] <- i3[m2,m1] <- E0
-            }
-
-            #Next, I1 and I2
-            if(um[1] == 0){
-              if(um[2] == 0){
-                i1[m1,m2] <- 0
-                i1[m2,m1] <- 0
-                i2[m1,m2] <- i2[m2,m1] <- E0
-              }else{
-                i1[m1,m2] <- 0
-                i1[m2,m1] <- E0
-                i2[m1,m2] <- i2[m2,m1] <- E1 - tm[2]*E0
+              if(sm[1] == 1 & sm[2] == 1){
+                a[m1,m2]  <- a[m2,m1]  <- max(tm)
+                bp[m1,m2] <- bp[m2,m1] <- Inf
               }
-            }else{
-              if(um[2] == 0){
-                i2[m1,m2] <- i2[m2,m1] <- E1 - tm[1]*E0
-                i1[m1,m2] <- E0
-                i1[m2,m1] <- 0
+              if(sm[1] == 1 & sm[2] == -1){
+                a[m1,m2]  <- a[m2,m1]  <- tm[1]
+                bp[m1,m2] <- bp[m2,m1] <- tm[2]
+              }
+              if(sm[1] == -1 & sm[2] == 1){
+                a[m1,m2]  <- a[m2,m1]  <- tm[2]
+                bp[m1,m2] <- bp[m2,m1] <- tm[1]
+              }
+              if(sm[1] == -1 & sm[2] == -1){
+                a[m1,m2]  <- a[m2,m1]  <- -Inf
+                bp[m1,m2] <- bp[m2,m1] <- min(tm)
+              }
+              aa <- a[m1,m2]
+              bb <-  max(a[m1,m2], bp[m1,m2])
+
+              # Compute integrals
+              #E0 <- Efunc(0, aa, bb, prior_i)
+              #E1 <- Efunc(1, aa, bb, prior_i)
+              #E2 <- Efunc(2, aa, bb, prior_i)
+
+              E0 <- XI_FUNC(0, aa, bb, prior_i)
+              E1 <- XI_FUNC(1, aa, bb, prior_i)
+              E2 <- NULL #Only compute when needed
+
+              if(is.nan(E1) | is.nan(E0)){
+                browser()
+              }
+
+              # Start with I3
+              if(um[1] == 0 | um[2] == 0){
+                i3[m1,m2] <- i3[m2,m1] <- 0
               }else{
-                E2 <- XI_FUNC(2, aa, bb, prior_i)
-                i1[m1,m2] <- E1 - tm[2]*E0
-                i1[m2,m1] <- E1 - tm[1]*E0
-                i2[m1,m2] <- i2[m2,m1] <- E2 - (tm[1] + tm[2])*E1 + tm[1]*tm[2]*E0
+                i3[m1,m2] <- i3[m2,m1] <- E0
+              }
+
+              #Next, I1 and I2
+              if(um[1] == 0){
+                if(um[2] == 0){
+                  i1[m1,m2] <- 0
+                  i1[m2,m1] <- 0
+                  i2[m1,m2] <- i2[m2,m1] <- E0
+                }else{
+                  i1[m1,m2] <- 0
+                  i1[m2,m1] <- E0
+                  i2[m1,m2] <- i2[m2,m1] <- E1 - tm[2]*E0
+                }
+              }else{
+                if(um[2] == 0){
+                  i2[m1,m2] <- i2[m2,m1] <- E1 - tm[1]*E0
+                  i1[m1,m2] <- E0
+                  i1[m2,m1] <- 0
+                }else{
+                  E2 <- XI_FUNC(2, aa, bb, prior_i)
+                  i1[m1,m2] <- E1 - tm[2]*E0
+                  i1[m2,m1] <- E1 - tm[1]*E0
+                  i2[m1,m2] <- i2[m2,m1] <- E2 - (tm[1] + tm[2])*E1 + tm[1]*tm[2]*E0
+                }
               }
             }
           }
+          b <- pmax(a, bp)
+          A[i,,] <- a
+          B[i,,] <- b
+          I1[i,,] <- i1
+          I2[i,,] <- i2
+          I3[i,,] <- i3
         }
-        b <- pmax(a, bp)
-        A[i,,] <- a
-        B[i,,] <- b
-        I1[i,,] <- i1
-        I2[i,,] <- i2
-        I3[i,,] <- i3
-      }
-      #Add signs to the I's
-      I1 <- I1*C
-      I2 <- I2*C
-      I3 <- I3*C
-    }
-    #Reconstruct Constantine matrix
-    Cf <- matrix(NA, nrow=mod$pdes, ncol=mod$pdes)
-    for(i in 1:mod$pdes){
-      for(j in 1:i){
-        if(i == j){
-          cij_curr <- crossprod(coeff)*I3[i,,]
-          for(k in (1:mod$pdes)[-c(i)]){
-            cij_curr <- cij_curr * I2[k,,]
-          }
-          Cf[i,j] <- sum(cij_curr)
-        }else{
-          cij_curr <- crossprod(coeff)*I1[i,,]*t(I1[j,,])
-          for(k in (1:mod$pdes)[-c(i,j)]){
-            cij_curr <- cij_curr * I2[k,,]
-          }
-          Cf[i,j] <- Cf[j,i] <- sum(cij_curr)
-        }
-        # Matrix-y way of doing things (kinda)
-        # This might save a little time when p is large, but the way I chose to code it (for time savings) has divide by zero problems if not careful
-        # if(mod$pdes > 30){
-        #   I2_prod <- matrix(1, M, M)
-        #   for(k in (1:mod$pdes)){
-        #     I2_prod <- I2_prod * I2[k,,]
-        #   }
-        #   if(i == j){
-        #     Cf[i,i] <- coeff%*%(I3[i,,] * I2_prod / (I2[i,,]+ 1e-12))%*%t(coeff)
-        #   }else{
-        #     Cf[i,j] <- Cf[j,i] <- coeff%*%(I1[i,,] * t(I1[j,,]) * I2_prod / (I2[i,,] + 1e-12) / (I2[j,,] + 1e-12))%*%t(coeff)
-        #   }
-        # }else{do it another way}
-        #A third way to do it
-        # I2_prod <- matrix(1, M, M)
-        # if(i == j){
-        #   for(k in (1:mod$pdes)[-i]){
-        #     I2_prod <- I2_prod * I2[k,,]
-        #   }
-        #   Iii <- I3[i,,] * I2_prod
-        #   Cf[i,i] <- coeff%*%Iii%*%t(coeff)
-        # }else{
-        #   for(k in (1:mod$pdes)[-c(i,j)]){
-        #     I2_prod <- I2_prod * I2[k,,]
-        #   }
-        #   Iij <- I1[i,,] * t(I1[j,,]) * I2_prod
-        #   Cf[i,j] <- Cf[j,i] <- coeff%*%Iij%*%t(coeff)
-        # }
+        #Add signs to the I's
+        I1 <- I1*C
+        I2 <- I2*C
+        I3 <- I3*C
       }
     }
-    if(scale01 == FALSE){
-      # Transform back to native space
-      Cf <- t(A_tform)%*%Cf%*%A_tform
+    if(M > 0){
+      #Reconstruct Constantine matrix
+      Cf <- matrix(NA, nrow=mod$pdes, ncol=mod$pdes)
+      for(i in 1:mod$pdes){
+        for(j in 1:i){
+          if(i == j){
+            cij_curr <- crossprod(coeff)*I3[i,,]
+            for(k in (1:mod$pdes)[-c(i)]){
+              cij_curr <- cij_curr * I2[k,,]
+            }
+            Cf[i,j] <- sum(cij_curr)
+          }else{
+            cij_curr <- crossprod(coeff)*I1[i,,]*t(I1[j,,])
+            for(k in (1:mod$pdes)[-c(i,j)]){
+              cij_curr <- cij_curr * I2[k,,]
+            }
+            Cf[i,j] <- Cf[j,i] <- sum(cij_curr)
+          }
+          # Matrix-y way of doing things (kinda)
+          # This might save a little time when p is large, but the way I chose to code it (for time savings) has divide by zero problems if not careful
+          # if(mod$pdes > 30){
+          #   I2_prod <- matrix(1, M, M)
+          #   for(k in (1:mod$pdes)){
+          #     I2_prod <- I2_prod * I2[k,,]
+          #   }
+          #   if(i == j){
+          #     Cf[i,i] <- coeff%*%(I3[i,,] * I2_prod / (I2[i,,]+ 1e-12))%*%t(coeff)
+          #   }else{
+          #     Cf[i,j] <- Cf[j,i] <- coeff%*%(I1[i,,] * t(I1[j,,]) * I2_prod / (I2[i,,] + 1e-12) / (I2[j,,] + 1e-12))%*%t(coeff)
+          #   }
+          # }else{do it another way}
+          #A third way to do it
+          # I2_prod <- matrix(1, M, M)
+          # if(i == j){
+          #   for(k in (1:mod$pdes)[-i]){
+          #     I2_prod <- I2_prod * I2[k,,]
+          #   }
+          #   Iii <- I3[i,,] * I2_prod
+          #   Cf[i,i] <- coeff%*%Iii%*%t(coeff)
+          # }else{
+          #   for(k in (1:mod$pdes)[-c(i,j)]){
+          #     I2_prod <- I2_prod * I2[k,,]
+          #   }
+          #   Iij <- I1[i,,] * t(I1[j,,]) * I2_prod
+          #   Cf[i,j] <- Cf[j,i] <- coeff%*%Iij%*%t(coeff)
+          # }
+        }
+      }
+      if(scale01 == FALSE){
+        # Transform back to native space
+        Cf <- t(A_tform)%*%Cf%*%A_tform
+      }
     }
+
     Cf_post[[r]] <- Cf
   }
   class(Cf_post) <- "ConstantineMatrix"
