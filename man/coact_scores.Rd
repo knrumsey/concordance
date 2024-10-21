@@ -15,7 +15,7 @@ coact_scores(V, q = 1, signed = TRUE, plt = FALSE, norm = FALSE)
 
 \item{plt}{Logical, should a plot be made?}
 
-\item{norm}{Logical, should activity scores be normalized to have a maximum value of 1?}
+\item{norm}{Logical, should activity scores be normalized to have a length of 1?}
 }
 \value{
 the coactivityactivity scores

@@ -5,7 +5,7 @@
 #' @param C Constantines C matrix (e.g. from C_bass, C_mc, or C_gp)
 #' @param k The number of columns of W to consider
 #' @param plt Logical, should a plot be made?
-#' @param norm Logical, should activity scores be normalized to have a maximum value of 1?
+#' @param norm Logical, should activity scores be normalized to have length one?
 #' @return the activity scores
 #' @export
 act_scores <- function(C, k=1, plt=FALSE, norm=FALSE){
@@ -19,7 +19,7 @@ act_scores <- function(C, k=1, plt=FALSE, norm=FALSE){
   }
 
   if(norm){
-    res <- res/max(res)
+    res <- res/sqrt(sum(res^2))
   }
 
   if(plt){
@@ -37,7 +37,7 @@ act_scores <- function(C, k=1, plt=FALSE, norm=FALSE){
 #' @param q The number of columns of W to consider
 #' @param signed Use signed or unsigned version?
 #' @param plt Logical, should a plot be made?
-#' @param norm Logical, should activity scores be normalized to have a maximum value of 1?
+#' @param norm Logical, should activity scores be normalized to have a length of 1?
 #' @return the coactivityactivity scores
 #' @export
 coact_scores <- function(V, q=1, signed=TRUE, plt=FALSE, norm=FALSE){
@@ -56,7 +56,7 @@ coact_scores <- function(V, q=1, signed=TRUE, plt=FALSE, norm=FALSE){
   }
 
   if(norm){
-    res <- res/max(abs(res))
+    res <- res/sqrt(sum(res^2))
   }
 
   if(plt){

@@ -13,7 +13,7 @@ act_scores(C, k = 1, plt = FALSE, norm = FALSE)
 
 \item{plt}{Logical, should a plot be made?}
 
-\item{norm}{Logical, should activity scores be normalized to have a maximum value of 1?}
+\item{norm}{Logical, should activity scores be normalized to have length one?}
 }
 \value{
 the activity scores
