@@ -125,6 +125,18 @@ Cfg_bassPCA <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use=NU
   if(class(modPCA1) != "bassBasis") stop("modPCA must be an object with class bassBasis")
   if(class(modPCA2) != "bassBasis") stop("modPCA must be an object with class bassBasis")
 
+  # Handle mcmc.use
+  if(is.null(mcmc.use)){
+    mcmc.use <- min(length(mod$s2), length(mod2$s2))
+  }
+  mcmc.use <- as.matrix(mcmc.use)
+  if(ncol(mcmc.use) == 1){
+    mcmc.use <- cbind(mcmc.use, mcmc.use)
+  }
+  if(ncol(mcmc.use) > 2){
+    warning("ncol(mcmc.use) should not exceed 2")
+  }
+
   # Get weights matrix
   phi1 <- modPCA1$dat$basis
   phi2 <- modPCA2$dat$basis
@@ -173,6 +185,18 @@ Cfg_bassPCA_v2 <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use
   nfunc <- nrow(phi1)
   if(is.null(func.use)) func.use <- 1:nfunc
 
+
+  if(is.null(mcmc.use)){
+    mcmc.use <- min(length(mod$s2), length(mod2$s2))
+  }
+  mcmc.use <- as.matrix(mcmc.use)
+  if(ncol(mcmc.use) == 1){
+    mcmc.use <- cbind(mcmc.use, mcmc.use)
+  }
+  if(ncol(mcmc.use) > 2){
+    warning("ncol(mcmc.use) should not exceed 2")
+  }
+
   # Get model list
   mod_list1 <- modPCA1$mod.list
   mod_list2 <- modPCA2$mod.list
@@ -188,11 +212,8 @@ Cfg_bassPCA_v2 <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use
       cnt <- cnt + 1
     }
   }
-  if(is.null(mcmc.use)){
-    # If null, just use last mcmc iteration
-    mcmc.use <- length(mod_list[[1]]$nbasis)
-  }
-  if(length(mcmc.use) == 1){
+
+  if(nrow(mcmc.use) == 1){
     p <- nrow(Cij[[1]])
   }else{
     p <- nrow(Cij[[1]][[1]])
@@ -205,13 +226,13 @@ Cfg_bassPCA_v2 <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use
     tt <- func.use[t]
     # Initialize Ctmp
     Ctmp <- list()
-    for(k in seq_along(mcmc.use)){
+    for(k in 1:nrow(mcmc.use)){
       Ctmp[[k]] <- matrix(0, nrow=p, ncol=p)
     }
     for(i in 1:nbassmodels1){
       for(j in 1:nbassmodels2){
-        for(k in seq_along(mcmc.use)){
-          if(length(mcmc.use) == 1){
+        for(k in 1:nrow(mcmc.use)){
+          if(nrow(mcmc.use) == 1){
             Ctmp[[k]] <- Ctmp[[k]] + phi1[tt,i]*phi2[tt,j]*Cij[[cnt]]
           }else{
             Ctmp[[k]] <- Ctmp[[k]] + phi1[tt,i]*phi2[tt,j]*Cij[[cnt]][[k]]
@@ -220,7 +241,7 @@ Cfg_bassPCA_v2 <- function(modPCA1, modPCA2, prior=NULL, mcmc.use=NULL, func.use
         cnt <- cnt + 1
       }
     }
-    if(length(mcmc.use) == 1){
+    if(nrow(mcmc.use) == 1){
       Cfgt[[t]] <- Ctmp[[1]]
     }else{
       Cfgt[[t]] <- Ctmp
