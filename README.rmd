@@ -1,8 +1,22 @@
 ---
-title: "concordance"
+title: "concordance (DEPRECATED)"
 output: github_document
 bibliography: README-bib.bib
 ---
+
+## Notice
+<div style="color: red; font-weight: bold;">
+This package **`concordance` is deprecated** and no longer maintained. A more complete and actively developed replacement is available as the **[`coactivity`](https://github.com/knrumsey/coactivity)** package.
+  
+To install the new version:
+
+```r
+# install.packages("devtools")  # if needed
+devtools::install_github("knrumsey/coactivity")
+```
+Please migrate to `coactivity` for updated methods, and continued support.
+
+</div>
 
 [![License: GPL v3](https://img.shields.io/badge/License-BSD_3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 `r badger::badge_devel("knrumsey/concordance", "purple")`

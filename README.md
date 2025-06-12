@@ -1,5 +1,25 @@
-concordance
+concordance (DEPRECATED)
 ================
+
+## Notice
+
+<div style="color: red; font-weight: bold;">
+
+This package **`concordance` is deprecated** and no longer maintained. A
+more complete and actively developed replacement is available as the
+**[`coactivity`](https://github.com/knrumsey/coactivity)** package.
+
+To install the new version:
+
+``` r
+# install.packages("devtools")  # if needed
+devtools::install_github("knrumsey/coactivity")
+```
+
+Please migrate to `coactivity` for updated methods, and continued
+support.
+
+</div>
 
 [![License: GPL
 v3](https://img.shields.io/badge/License-BSD_3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -11,6 +31,7 @@ v3](https://img.shields.io/badge/License-BSD_3-blue.svg)](https://www.gnu.org/li
 
 <img src="inst/logos/CONCORDANCE.png" alt="This logo was designed by Imagine AI Art Studio" width="50%" />
 <p class="caption">
+
 This logo was designed by Imagine AI Art Studio
 </p>
 
@@ -23,9 +44,9 @@ for the [discovery of active subspaces in
 high-dimensions](https://arxiv.org/pdf/2307.11241.pdf) (described in
 Rumsey, Francom, and Wiel (2023)). The “workhorse” of the package is the
 `C_bass()` function, which estimates *Constantine’s* $C$ matrix (see
-(**constantine2015?**))for a given computer model and behaves similarly
-to the `activegp::C_gp()` function (described in Wycoff, Binois, and
-Wild (2021)). The `C_bass()` function, which relies on a Bayesian MARS
+Constantine (2015))for a given computer model and behaves similarly to
+the `activegp::C_gp()` function (described in Wycoff, Binois, and Wild
+(2021)). The `C_bass()` function, which relies on a Bayesian MARS
 emulator (as described in Francom and Sansó (2020) and implemented in
 the [BASS package](https://CRAN.R-project.org/package=BASS)) is likely
 to be more efficient and accurate when the dimension of the input space
@@ -60,7 +81,15 @@ perform publicly and display publicly, and to permit others to do so.*
 
 ## References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
+
+<div id="ref-constantine2015active" class="csl-entry">
+
+Constantine, Paul G. 2015. *Active Subspaces: Emerging Ideas for
+Dimension Reduction in Parameter Studies*. SIAM.
+
+</div>
 
 <div id="ref-francom2020bass" class="csl-entry">
 
