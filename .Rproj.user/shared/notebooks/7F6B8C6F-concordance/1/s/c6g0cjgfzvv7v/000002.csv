@@ -1,3 +1,0 @@
-"0","n <- 500"
-"0","x <- matrix(runif(3*n), nrow=n)"
-"0","y <- apply(x, 1, f)"
